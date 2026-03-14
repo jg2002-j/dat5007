@@ -1,0 +1,2408 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Recipe API",
+    "description": "B2B Recipe API providing structured recipes with comprehensive nutrition data.\n\n**Quick Start** - Try it now (no API key needed):\n```\ncurl https://recipe-api.com/api/v1/dinner\n```\n\n**Sample Responses** - All endpoints below show example responses so you can evaluate the data structure before signing up. Expand any endpoint to see what you'll receive.\n\n**Authentication** - Protected endpoints require an `X-API-Key` header. Get your key at [recipe-api.com](https://recipe-api.com/#pricing).",
+    "version": "1.0.0",
+    "contact": {
+      "email": "paul@recipe-api.com"
+    }
+  },
+  "servers": [
+    {
+      "url": "https://recipe-api.com",
+      "description": "Production"
+    }
+  ],
+  "tags": [
+    {
+      "name": "Public",
+      "description": "No authentication required. Try `/api/v1/dinner` for a complete recipe example."
+    },
+    {
+      "name": "Discovery",
+      "description": "Requires API key. No credit cost. Browse categories, cuisines, and dietary options."
+    },
+    {
+      "name": "Recipes",
+      "description": "Browse recipes free. Full recipe detail costs 1 credit. Sample data shown inline."
+    }
+  ],
+  "paths": {
+    "/health": {
+      "get": {
+        "tags": [
+          "Public"
+        ],
+        "summary": "Health check",
+        "responses": {
+          "200": {
+            "description": "Service is healthy",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "string",
+                      "example": "ok"
+                    },
+                    "timestamp": {
+                      "type": "string",
+                      "format": "date-time"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/dinner": {
+      "get": {
+        "tags": [
+          "Public"
+        ],
+        "summary": "What's for dinner?",
+        "description": "Returns a single delicious dinner recipe with all fields. Perfect for testing the API schema. Try it: `curl https://recipe-api.com/api/v1/dinner`",
+        "responses": {
+          "200": {
+            "description": "A complete recipe",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Recipe"
+                },
+                "example": {
+                  "id": "a066f472-ed0c-46ea-8e2c-a0053c3183a8",
+                  "name": "Texas Chili con Carne",
+                  "description": "A thick, beef-based stew featuring tender cubes of meat in a rich sauce made from reconstituted whole chilies and aromatic spices without beans or tomatoes.",
+                  "category": "Dinner",
+                  "cuisine": "American",
+                  "difficulty": "Intermediate",
+                  "tags": [
+                    "Beef",
+                    "Slow-Cooked",
+                    "High-Protein",
+                    "Southwestern"
+                  ],
+                  "meta": {
+                    "active_time": "PT20M",
+                    "passive_time": "PT1H40M",
+                    "total_time": "PT2H",
+                    "overnight_required": false,
+                    "yields": "4 servings",
+                    "yield_count": 4,
+                    "serving_size_g": 300
+                  },
+                  "dietary": {
+                    "flags": [
+                      "Gluten-Free",
+                      "Dairy-Free",
+                      "Egg-Free",
+                      "Nut-Free",
+                      "Soy-Free"
+                    ],
+                    "not_suitable_for": []
+                  },
+                  "storage": {
+                    "refrigerator": {
+                      "duration": "P4D",
+                      "notes": "Flavor improves after 24 hours."
+                    },
+                    "freezer": {
+                      "duration": "P3M",
+                      "notes": "Thaw overnight in refrigerator before reheating."
+                    },
+                    "reheating": "Heat in a saucepan over medium-low heat, adding a splash of water if too thick.",
+                    "does_not_keep": false
+                  },
+                  "equipment": [
+                    {
+                      "name": "Blender",
+                      "required": true,
+                      "alternative": "Food processor or mortar and pestle"
+                    },
+                    {
+                      "name": "Heavy skillet",
+                      "required": true,
+                      "alternative": "Dutch oven"
+                    }
+                  ],
+                  "ingredients": [
+                    {
+                      "group_name": "Chili Base",
+                      "items": [
+                        {
+                          "name": "dried red chilies",
+                          "quantity": 6,
+                          "unit": null,
+                          "preparation": "stemmed and seeded",
+                          "notes": "about 30g",
+                          "substitutions": [
+                            "ancho chilies",
+                            "guajillo chilies"
+                          ],
+                          "ingredient_id": "3c3f97d4-c951-43fd-865c-88fa8b445739",
+                          "nutrition_source": "USDA FoodData Central"
+                        },
+                        {
+                          "name": "stewing beef",
+                          "quantity": 910,
+                          "unit": "g",
+                          "preparation": "cut into 1.3cm cubes",
+                          "notes": null,
+                          "substitutions": [],
+                          "ingredient_id": "09f2eef4-739a-4fca-8b63-97d697257990",
+                          "nutrition_source": "USDA FoodData Central"
+                        }
+                      ]
+                    },
+                    {
+                      "group_name": "Flavor Paste",
+                      "items": [
+                        {
+                          "name": "garlic",
+                          "quantity": 2,
+                          "unit": "cloves",
+                          "preparation": "peeled",
+                          "notes": null,
+                          "substitutions": [],
+                          "ingredient_id": "30109e1e-d8e8-4f76-a6f4-82ac5b071fde",
+                          "nutrition_source": "USDA FoodData Central"
+                        },
+                        {
+                          "name": "cumin",
+                          "quantity": 7,
+                          "unit": "g",
+                          "preparation": null,
+                          "notes": null,
+                          "substitutions": [],
+                          "ingredient_id": "b9c9e3cb-61b7-4bbc-87c0-7858d42d7935",
+                          "nutrition_source": "USDA FoodData Central"
+                        }
+                      ]
+                    }
+                  ],
+                  "instructions": [
+                    {
+                      "step_number": 1,
+                      "phase": "prep",
+                      "text": "Tear the dried chilies into strips and place them in a bowl. Cover with 240ml of boiling water and soak for 30 minutes.",
+                      "structured": {
+                        "action": "SOAK",
+                        "temperature": null,
+                        "duration": "PT30M",
+                        "doneness_cues": null
+                      },
+                      "tips": []
+                    },
+                    {
+                      "step_number": 2,
+                      "phase": "cook",
+                      "text": "Heat olive oil in a heavy skillet over medium-high heat. Brown the beef cubes on all sides until a crust forms.",
+                      "structured": {
+                        "action": "SEAR",
+                        "temperature": null,
+                        "duration": null,
+                        "doneness_cues": {
+                          "visual": "Beef is deeply browned on all sides",
+                          "tactile": null
+                        }
+                      },
+                      "tips": []
+                    },
+                    {
+                      "step_number": 3,
+                      "phase": "cook",
+                      "text": "Reduce heat to low, cover, and simmer for 1 hour until beef is fork-tender.",
+                      "structured": {
+                        "action": "SIMMER",
+                        "temperature": {
+                          "celsius": 90,
+                          "fahrenheit": 194
+                        },
+                        "duration": "PT1H",
+                        "doneness_cues": {
+                          "visual": null,
+                          "tactile": "Beef cubes are fork-tender"
+                        }
+                      },
+                      "tips": []
+                    }
+                  ],
+                  "troubleshooting": [
+                    {
+                      "symptom": "Beef is tough or chewy",
+                      "likely_cause": "The meat has not simmered long enough.",
+                      "prevention": "Ensure liquid is at a very low simmer with lid sealed.",
+                      "fix": "Continue simmering in 15-minute increments until tender."
+                    }
+                  ],
+                  "chef_notes": [
+                    "For deeper flavor, use a variety of dried chilies like ancho, guajillo, and pasilla."
+                  ],
+                  "cultural_context": "Texas Chili is a hearty stew deeply rooted in Texan culinary tradition, distinguished by the absence of beans and tomatoes.",
+                  "nutrition": {
+                    "per_serving": {
+                      "calories": 569,
+                      "protein_g": 44.1,
+                      "carbohydrates_g": 5.6,
+                      "fat_g": 42,
+                      "saturated_fat_g": 16.5,
+                      "fiber_g": 2,
+                      "sodium_mg": 351,
+                      "cholesterol_mg": 155,
+                      "potassium_mg": 903,
+                      "iron_mg": 7.2,
+                      "vitamin_b12_mcg": 6.1
+                    },
+                    "sources": [
+                      "USDA FoodData Central"
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/categories": {
+      "get": {
+        "tags": [
+          "Discovery"
+        ],
+        "summary": "List all categories",
+        "description": "Returns all recipe categories with recipe counts. No credit cost.",
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of categories",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "name": {
+                            "type": "string",
+                            "example": "Dinner"
+                          },
+                          "count": {
+                            "type": "integer",
+                            "example": 245
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "data": [
+                    {
+                      "name": "Dinner",
+                      "count": 847
+                    },
+                    {
+                      "name": "Breakfast",
+                      "count": 312
+                    },
+                    {
+                      "name": "Lunch",
+                      "count": 289
+                    },
+                    {
+                      "name": "Dessert",
+                      "count": 256
+                    },
+                    {
+                      "name": "Appetizer",
+                      "count": 198
+                    },
+                    {
+                      "name": "Snack",
+                      "count": 145
+                    },
+                    {
+                      "name": "Brunch",
+                      "count": 89
+                    },
+                    {
+                      "name": "Side Dish",
+                      "count": 76
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          }
+        }
+      }
+    },
+    "/api/v1/cuisines": {
+      "get": {
+        "tags": [
+          "Discovery"
+        ],
+        "summary": "List all cuisines",
+        "description": "Returns all cuisines with recipe counts. No credit cost.",
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of cuisines",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "name": {
+                            "type": "string",
+                            "example": "Italian"
+                          },
+                          "count": {
+                            "type": "integer",
+                            "example": 89
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "data": [
+                    {
+                      "name": "Italian",
+                      "count": 234
+                    },
+                    {
+                      "name": "Mexican",
+                      "count": 198
+                    },
+                    {
+                      "name": "American",
+                      "count": 187
+                    },
+                    {
+                      "name": "Asian",
+                      "count": 156
+                    },
+                    {
+                      "name": "Mediterranean",
+                      "count": 134
+                    },
+                    {
+                      "name": "French",
+                      "count": 98
+                    },
+                    {
+                      "name": "Indian",
+                      "count": 89
+                    },
+                    {
+                      "name": "Japanese",
+                      "count": 76
+                    },
+                    {
+                      "name": "Thai",
+                      "count": 65
+                    },
+                    {
+                      "name": "Greek",
+                      "count": 54
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          }
+        }
+      }
+    },
+    "/api/v1/dietary-flags": {
+      "get": {
+        "tags": [
+          "Discovery"
+        ],
+        "summary": "List all dietary flags",
+        "description": "Returns all dietary flags with recipe counts. No credit cost.",
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of dietary flags",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "name": {
+                            "type": "string",
+                            "example": "Vegetarian"
+                          },
+                          "count": {
+                            "type": "integer",
+                            "example": 156
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "data": [
+                    {
+                      "name": "Gluten-Free",
+                      "count": 456
+                    },
+                    {
+                      "name": "Vegetarian",
+                      "count": 387
+                    },
+                    {
+                      "name": "Dairy-Free",
+                      "count": 312
+                    },
+                    {
+                      "name": "Vegan",
+                      "count": 234
+                    },
+                    {
+                      "name": "Nut-Free",
+                      "count": 198
+                    },
+                    {
+                      "name": "Low-Carb",
+                      "count": 167
+                    },
+                    {
+                      "name": "Egg-Free",
+                      "count": 145
+                    },
+                    {
+                      "name": "Soy-Free",
+                      "count": 123
+                    },
+                    {
+                      "name": "Paleo",
+                      "count": 89
+                    },
+                    {
+                      "name": "Keto",
+                      "count": 67
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          }
+        }
+      }
+    },
+    "/api/v1/ingredients": {
+      "get": {
+        "tags": [
+          "Discovery"
+        ],
+        "summary": "Browse ingredients",
+        "description": "Returns a paginated list of ingredients with optional filtering by name or category. No credit cost.",
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "q",
+            "in": "query",
+            "description": "Search by ingredient name",
+            "schema": {
+              "type": "string"
+            },
+            "example": "chicken"
+          },
+          {
+            "name": "category",
+            "in": "query",
+            "description": "Filter by category",
+            "schema": {
+              "type": "string"
+            },
+            "example": "Legumes"
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "description": "Page number",
+            "schema": {
+              "type": "integer",
+              "default": 1,
+              "minimum": 1
+            }
+          },
+          {
+            "name": "per_page",
+            "in": "query",
+            "description": "Results per page",
+            "schema": {
+              "type": "integer",
+              "default": 50,
+              "minimum": 1,
+              "maximum": 100
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Paginated ingredient list",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/IngredientItem"
+                      }
+                    },
+                    "meta": {
+                      "type": "object",
+                      "properties": {
+                        "total": {
+                          "type": "integer"
+                        },
+                        "page": {
+                          "type": "integer"
+                        },
+                        "per_page": {
+                          "type": "integer"
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "data": [
+                    {
+                      "id": "001764f3-4d44-4dbc-801b-0e4f094c756d",
+                      "name": "Chickpeas, canned, drained",
+                      "category": "Legumes",
+                      "source": "USDA"
+                    },
+                    {
+                      "id": "0004d34a-afbe-4934-b94e-195e1602b23d",
+                      "name": "Spelt, cooked",
+                      "category": "Grains & Pasta",
+                      "source": "USDA"
+                    },
+                    {
+                      "id": "0009da79-3cdb-4838-bdab-2e65ee0a9ccd",
+                      "name": "Nashi pear",
+                      "category": "Fruits",
+                      "source": "Aggregated Public Sources"
+                    }
+                  ],
+                  "meta": {
+                    "total": 10441,
+                    "page": 1,
+                    "per_page": 50
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          }
+        }
+      }
+    },
+    "/api/v1/ingredient-categories": {
+      "get": {
+        "tags": [
+          "Discovery"
+        ],
+        "summary": "List all ingredient categories",
+        "description": "Returns all ingredient categories with counts. No credit cost.",
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of ingredient categories",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "name": {
+                            "type": "string",
+                            "example": "Vegetables"
+                          },
+                          "count": {
+                            "type": "integer",
+                            "example": 1200
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "data": [
+                    {
+                      "name": "Vegetables",
+                      "count": 1283
+                    },
+                    {
+                      "name": "Beef",
+                      "count": 995
+                    },
+                    {
+                      "name": "Baked Goods",
+                      "count": 617
+                    },
+                    {
+                      "name": "Beverages",
+                      "count": 555
+                    },
+                    {
+                      "name": "Prepared Foods",
+                      "count": 530
+                    },
+                    {
+                      "name": "Sauces & Condiments",
+                      "count": 512
+                    },
+                    {
+                      "name": "Lamb & Game",
+                      "count": 504
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          }
+        }
+      }
+    },
+    "/api/v1/recipes": {
+      "get": {
+        "tags": [
+          "Recipes"
+        ],
+        "summary": "Browse and search recipes",
+        "description": "Returns a paginated list of recipes with optional filtering. Discovery limited to 500 recipes; use filters for larger catalogs. No credit cost.",
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "q",
+            "in": "query",
+            "description": "Search by name or description",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "category",
+            "in": "query",
+            "description": "Filter by category",
+            "schema": {
+              "type": "string"
+            },
+            "example": "Dinner"
+          },
+          {
+            "name": "cuisine",
+            "in": "query",
+            "description": "Filter by cuisine",
+            "schema": {
+              "type": "string"
+            },
+            "example": "Italian"
+          },
+          {
+            "name": "difficulty",
+            "in": "query",
+            "description": "Filter by difficulty",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "Easy",
+                "Intermediate",
+                "Advanced"
+              ]
+            }
+          },
+          {
+            "name": "dietary",
+            "in": "query",
+            "description": "Filter by dietary flags (comma-separated)",
+            "schema": {
+              "type": "string"
+            },
+            "example": "Vegetarian,Gluten-Free"
+          },
+          {
+            "name": "min_calories",
+            "in": "query",
+            "description": "Minimum calories per serving",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "max_calories",
+            "in": "query",
+            "description": "Maximum calories per serving",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "min_protein",
+            "in": "query",
+            "description": "Minimum protein (g) per serving",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "max_protein",
+            "in": "query",
+            "description": "Maximum protein (g) per serving",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "min_carbs",
+            "in": "query",
+            "description": "Minimum carbohydrates (g) per serving",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "max_carbs",
+            "in": "query",
+            "description": "Maximum carbohydrates (g) per serving",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "min_fat",
+            "in": "query",
+            "description": "Minimum fat (g) per serving",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "max_fat",
+            "in": "query",
+            "description": "Maximum fat (g) per serving",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "ingredients",
+            "in": "query",
+            "description": "Comma-separated ingredient UUIDs (returns recipes containing ALL specified ingredients)",
+            "schema": {
+              "type": "string"
+            },
+            "example": "3c3f97d4-c951-43fd-865c-88fa8b445739,30109e1e-d8e8-4f76-a6f4-82ac5b071fde"
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "description": "Page number (discovery limited to 500 total recipes)",
+            "schema": {
+              "type": "integer",
+              "default": 1,
+              "minimum": 1
+            }
+          },
+          {
+            "name": "per_page",
+            "in": "query",
+            "description": "Results per page",
+            "schema": {
+              "type": "integer",
+              "default": 20,
+              "minimum": 1,
+              "maximum": 100
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Paginated recipe list",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/RecipeListItem"
+                      }
+                    },
+                    "meta": {
+                      "type": "object",
+                      "properties": {
+                        "total": {
+                          "type": "integer",
+                          "description": "Total matching recipes (capped at 500 for discovery)"
+                        },
+                        "page": {
+                          "type": "integer"
+                        },
+                        "per_page": {
+                          "type": "integer"
+                        },
+                        "total_capped": {
+                          "type": "boolean",
+                          "description": "True if more recipes exist beyond the 500-recipe discovery limit"
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "data": [
+                    {
+                      "id": "a066f472-ed0c-46ea-8e2c-a0053c3183a8",
+                      "name": "Texas Chili con Carne",
+                      "description": "A thick, beef-based stew featuring tender cubes of meat in a rich sauce made from reconstituted whole chilies.",
+                      "category": "Dinner",
+                      "cuisine": "American",
+                      "difficulty": "Intermediate",
+                      "tags": [
+                        "Beef",
+                        "Slow-Cooked",
+                        "High-Protein",
+                        "Southwestern"
+                      ],
+                      "meta": {
+                        "active_time": "PT20M",
+                        "passive_time": "PT1H40M",
+                        "total_time": "PT2H",
+                        "overnight_required": false,
+                        "yields": "4 servings",
+                        "yield_count": 4,
+                        "serving_size_g": 300
+                      },
+                      "dietary": {
+                        "flags": [
+                          "Gluten-Free",
+                          "Dairy-Free",
+                          "Nut-Free"
+                        ],
+                        "not_suitable_for": []
+                      },
+                      "nutrition_summary": {
+                        "calories": 569,
+                        "protein_g": 44.1,
+                        "carbohydrates_g": 5.6,
+                        "fat_g": 42
+                      }
+                    },
+                    {
+                      "id": "b177e583-fe1d-57fb-9f3d-b1164d4294b9",
+                      "name": "Classic Margherita Pizza",
+                      "description": "Traditional Neapolitan pizza with San Marzano tomatoes, fresh mozzarella, basil, and olive oil on a thin, crispy crust.",
+                      "category": "Dinner",
+                      "cuisine": "Italian",
+                      "difficulty": "Easy",
+                      "tags": [
+                        "Vegetarian",
+                        "Italian",
+                        "Quick"
+                      ],
+                      "meta": {
+                        "active_time": "PT25M",
+                        "passive_time": "PT1H",
+                        "total_time": "PT1H25M",
+                        "overnight_required": false,
+                        "yields": "2 pizzas",
+                        "yield_count": 2,
+                        "serving_size_g": 250
+                      },
+                      "dietary": {
+                        "flags": [
+                          "Vegetarian",
+                          "Nut-Free"
+                        ],
+                        "not_suitable_for": [
+                          "Lactose intolerant"
+                        ]
+                      },
+                      "nutrition_summary": {
+                        "calories": 320,
+                        "protein_g": 14.5,
+                        "carbohydrates_g": 38.2,
+                        "fat_g": 12.8
+                      }
+                    }
+                  ],
+                  "meta": {
+                    "total": 500,
+                    "page": 1,
+                    "per_page": 20,
+                    "total_capped": true
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Discovery limit exceeded",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": {
+                    "code": "DISCOVERY_LIMIT_EXCEEDED",
+                    "message": "Page exceeds discovery limit. Maximum 500 recipes accessible. Use filters to narrow results."
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          }
+        }
+      }
+    },
+    "/api/v1/recipes/{id}": {
+      "get": {
+        "tags": [
+          "Recipes"
+        ],
+        "summary": "Get full recipe by ID",
+        "description": "Returns complete recipe details including ingredients, instructions, and nutrition. **Costs 1 credit.**",
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "Recipe UUID",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Full recipe details with usage info",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/Recipe"
+                    },
+                    "usage": {
+                      "$ref": "#/components/schemas/Usage"
+                    }
+                  }
+                },
+                "example": {
+                  "data": {
+                    "id": "a066f472-ed0c-46ea-8e2c-a0053c3183a8",
+                    "name": "Texas Chili con Carne",
+                    "description": "A thick, beef-based stew featuring tender cubes of meat in a rich sauce made from reconstituted whole chilies and aromatic spices without beans or tomatoes.",
+                    "category": "Dinner",
+                    "cuisine": "American",
+                    "difficulty": "Intermediate",
+                    "tags": [
+                      "Beef",
+                      "Slow-Cooked",
+                      "High-Protein",
+                      "Southwestern"
+                    ],
+                    "meta": {
+                      "active_time": "PT20M",
+                      "passive_time": "PT1H40M",
+                      "total_time": "PT2H",
+                      "overnight_required": false,
+                      "yields": "4 servings",
+                      "yield_count": 4,
+                      "serving_size_g": 300
+                    },
+                    "dietary": {
+                      "flags": [
+                        "Gluten-Free",
+                        "Dairy-Free",
+                        "Egg-Free",
+                        "Nut-Free",
+                        "Peanut-Free",
+                        "Soy-Free"
+                      ],
+                      "not_suitable_for": []
+                    },
+                    "storage": {
+                      "refrigerator": {
+                        "duration": "P4D",
+                        "notes": "Flavor improves after 24 hours."
+                      },
+                      "freezer": {
+                        "duration": "P3M",
+                        "notes": "Thaw overnight in refrigerator before reheating."
+                      },
+                      "reheating": "Heat in a saucepan over medium-low heat, adding a splash of water if too thick.",
+                      "does_not_keep": false
+                    },
+                    "equipment": [
+                      {
+                        "name": "Blender",
+                        "required": true,
+                        "alternative": "Food processor or mortar and pestle"
+                      },
+                      {
+                        "name": "Heavy skillet",
+                        "required": true,
+                        "alternative": "Dutch oven or heavy-bottomed pot"
+                      },
+                      {
+                        "name": "Mixing bowl",
+                        "required": true,
+                        "alternative": null
+                      }
+                    ],
+                    "ingredients": [
+                      {
+                        "group_name": "Chili Base",
+                        "items": [
+                          {
+                            "name": "red chilies",
+                            "quantity": 6,
+                            "unit": null,
+                            "preparation": "dried",
+                            "notes": "about 30g",
+                            "substitutions": [],
+                            "ingredient_id": "3c3f97d4-c951-43fd-865c-88fa8b445739",
+                            "nutrition_source": "USDA FoodData Central"
+                          },
+                          {
+                            "name": "stewing beef",
+                            "quantity": 910,
+                            "unit": "g",
+                            "preparation": "cut into 1.3cm (1/2 inch) cubes",
+                            "notes": null,
+                            "substitutions": [],
+                            "ingredient_id": "09f2eef4-739a-4fca-8b63-97d697257990",
+                            "nutrition_source": "USDA FoodData Central"
+                          },
+                          {
+                            "name": "olive oil",
+                            "quantity": 15,
+                            "unit": "ml",
+                            "preparation": null,
+                            "notes": null,
+                            "substitutions": [],
+                            "ingredient_id": "e9f370c4-07c8-4d8d-8a9f-0edea38db44c",
+                            "nutrition_source": "USDA FoodData Central"
+                          },
+                          {
+                            "name": "bay leaves",
+                            "quantity": 2,
+                            "unit": null,
+                            "preparation": null,
+                            "notes": null,
+                            "substitutions": [],
+                            "ingredient_id": "eab2ef3a-7a0e-4188-b746-645b795ada1e",
+                            "nutrition_source": "USDA FoodData Central"
+                          }
+                        ]
+                      },
+                      {
+                        "group_name": "Flavor Paste",
+                        "items": [
+                          {
+                            "name": "garlic",
+                            "quantity": 2,
+                            "unit": null,
+                            "preparation": "peeled",
+                            "notes": "about 6g",
+                            "substitutions": [],
+                            "ingredient_id": "30109e1e-d8e8-4f76-a6f4-82ac5b071fde",
+                            "nutrition_source": "USDA FoodData Central"
+                          },
+                          {
+                            "name": "cumin",
+                            "quantity": 7,
+                            "unit": "g",
+                            "preparation": null,
+                            "notes": null,
+                            "substitutions": [],
+                            "ingredient_id": "b9c9e3cb-61b7-4bbc-87c0-7858d42d7935",
+                            "nutrition_source": "USDA FoodData Central"
+                          },
+                          {
+                            "name": "oregano",
+                            "quantity": 3,
+                            "unit": "g",
+                            "preparation": null,
+                            "notes": null,
+                            "substitutions": [],
+                            "ingredient_id": "687f54eb-e811-4e5e-ac2e-e2735458480c",
+                            "nutrition_source": "USDA FoodData Central"
+                          },
+                          {
+                            "name": "paprika",
+                            "quantity": 14,
+                            "unit": "g",
+                            "preparation": null,
+                            "notes": null,
+                            "substitutions": [],
+                            "ingredient_id": "f4c3bdd7-6528-40d2-84b3-a6325df15e8e",
+                            "nutrition_source": "USDA FoodData Central"
+                          },
+                          {
+                            "name": "sugar",
+                            "quantity": 4,
+                            "unit": "g",
+                            "preparation": null,
+                            "notes": null,
+                            "substitutions": [],
+                            "ingredient_id": "8ae7f905-b311-4f45-9527-5e3840369506",
+                            "nutrition_source": "USDA FoodData Central"
+                          },
+                          {
+                            "name": "salt",
+                            "quantity": null,
+                            "unit": null,
+                            "preparation": null,
+                            "notes": "to taste",
+                            "substitutions": [],
+                            "ingredient_id": "2631739c-2de4-4389-a6e3-ed3d06d0406f",
+                            "nutrition_source": "USDA FoodData Central"
+                          },
+                          {
+                            "name": "black pepper",
+                            "quantity": null,
+                            "unit": null,
+                            "preparation": null,
+                            "notes": "to taste",
+                            "substitutions": [],
+                            "ingredient_id": "c25dc1c9-4ea7-403c-976e-ab1d06578b7a",
+                            "nutrition_source": "USDA FoodData Central"
+                          }
+                        ]
+                      }
+                    ],
+                    "instructions": [
+                      {
+                        "step_number": 1,
+                        "phase": "prep",
+                        "text": "Tear the dried chilies into strips and place them in a bowl. Cover with 240ml (1 cup) of boiling water and soak for 30 minutes.",
+                        "structured": {
+                          "action": "SOAK",
+                          "temperature": null,
+                          "duration": "PT30M",
+                          "doneness_cues": null
+                        },
+                        "tips": []
+                      },
+                      {
+                        "step_number": 2,
+                        "phase": "prep",
+                        "text": "Drain the chilies and set them aside. Reserve the soaking liquid for the cooking process.",
+                        "structured": {
+                          "action": "DRAIN",
+                          "temperature": null,
+                          "duration": null,
+                          "doneness_cues": null
+                        },
+                        "tips": []
+                      },
+                      {
+                        "step_number": 3,
+                        "phase": "cook",
+                        "text": "Heat olive oil in a heavy skillet over medium-high heat. Brown the beef cubes on all sides until a crust forms.",
+                        "structured": {
+                          "action": "SEAR",
+                          "temperature": null,
+                          "duration": null,
+                          "doneness_cues": {
+                            "visual": "Beef is deeply browned on all sides",
+                            "tactile": null
+                          }
+                        },
+                        "tips": []
+                      },
+                      {
+                        "step_number": 4,
+                        "phase": "cook",
+                        "text": "Pour the reserved chili soaking liquid into the skillet. Add bay leaves and bring the liquid to a boil.",
+                        "structured": {
+                          "action": "BOIL",
+                          "temperature": null,
+                          "duration": null,
+                          "doneness_cues": null
+                        },
+                        "tips": []
+                      },
+                      {
+                        "step_number": 5,
+                        "phase": "cook",
+                        "text": "Reduce the heat to low, cover the skillet, and simmer for 1 hour.",
+                        "structured": {
+                          "action": "SIMMER",
+                          "temperature": {
+                            "celsius": 90,
+                            "fahrenheit": 194
+                          },
+                          "duration": "PT1H",
+                          "doneness_cues": null
+                        },
+                        "tips": []
+                      },
+                      {
+                        "step_number": 6,
+                        "phase": "prep",
+                        "text": "Combine the soaked chilies, garlic, cumin, oregano, paprika, sugar, salt, and pepper in a blender. Puree until smooth, adding a small amount of fresh water if the mixture is too thick.",
+                        "structured": {
+                          "action": "PUREE",
+                          "temperature": null,
+                          "duration": null,
+                          "doneness_cues": null
+                        },
+                        "tips": []
+                      },
+                      {
+                        "step_number": 7,
+                        "phase": "cook",
+                        "text": "Stir the chili puree into the skillet with the beef. Cover and continue to simmer for 30 minutes.",
+                        "structured": {
+                          "action": "SIMMER",
+                          "temperature": null,
+                          "duration": "PT30M",
+                          "doneness_cues": {
+                            "visual": null,
+                            "tactile": "Beef cubes are fork-tender"
+                          }
+                        },
+                        "tips": []
+                      },
+                      {
+                        "step_number": 8,
+                        "phase": "finish",
+                        "text": "Remove and discard the bay leaves. Taste and add more salt or pepper if needed before serving.",
+                        "structured": {
+                          "action": "SERVE",
+                          "temperature": null,
+                          "duration": null,
+                          "doneness_cues": null
+                        },
+                        "tips": []
+                      }
+                    ],
+                    "troubleshooting": [
+                      {
+                        "symptom": "Beef is tough or chewy",
+                        "likely_cause": "The meat has not simmered long enough to break down connective tissue.",
+                        "prevention": "Ensure the liquid is at a very low simmer and the lid is tightly sealed.",
+                        "fix": "Continue simmering in 15-minute increments until tender."
+                      },
+                      {
+                        "symptom": "Chili is too watery",
+                        "likely_cause": "Too much water added during blending or insufficient reduction.",
+                        "prevention": "Add water to the blender only 15ml at a time.",
+                        "fix": "Simmer uncovered for the final 15 minutes to evaporate excess moisture."
+                      }
+                    ],
+                    "chef_notes": [
+                      "For the deepest chili flavor, use a variety of dried chilies like ancho, guajillo, and pasilla. Toasting them briefly before soaking can enhance their aroma.",
+                      "Don't overcrowd the skillet when browning the beef; sear in batches if necessary to ensure a good crust, which adds significant flavor to the final dish.",
+                      "The simmering time is crucial for tenderizing the beef. Low and slow is key; the meat should be easily pierced with a fork.",
+                      "The consistency of the chili can be adjusted by the amount of soaking liquid you use and the final simmering time. If it's too thick, add a splash of water or beef broth; if too thin, simmer uncovered for a bit longer."
+                    ],
+                    "cultural_context": "Texas Chili, or Chili con Carne, is a hearty stew deeply rooted in Texan culinary tradition. Its origins trace back to the mid-19th century, with early versions featuring simple ingredients like dried beef, chilies, and spices, cooked by cowboys and ranchers. The absence of beans and tomatoes is a defining characteristic, distinguishing it from other regional chili variations and emphasizing its pure, meat-and-chili flavor profile.",
+                    "nutrition": {
+                      "per_serving": {
+                        "calories": 569.02,
+                        "protein_g": 44.14,
+                        "carbohydrates_g": 5.59,
+                        "fat_g": 41.99,
+                        "saturated_fat_g": 16.48,
+                        "trans_fat_g": 2.39,
+                        "monounsaturated_fat_g": 20.66,
+                        "polyunsaturated_fat_g": 2.29,
+                        "fiber_g": 1.97,
+                        "sugar_g": 1.84,
+                        "sodium_mg": 350.75,
+                        "cholesterol_mg": 154.7,
+                        "potassium_mg": 903.3,
+                        "calcium_mg": 74.24,
+                        "iron_mg": 7.16,
+                        "magnesium_mg": 60.57,
+                        "phosphorus_mg": 434.12,
+                        "zinc_mg": 16.82,
+                        "vitamin_a_mcg": 101.01,
+                        "vitamin_c_mg": 11.51,
+                        "vitamin_d_mcg": 0.23,
+                        "vitamin_e_mg": 2.15,
+                        "vitamin_k_mcg": 14.73,
+                        "vitamin_b6_mg": 0.97,
+                        "vitamin_b12_mcg": 6.14,
+                        "thiamin_mg": 0.19,
+                        "riboflavin_mg": 0.38,
+                        "niacin_mg": 10.47,
+                        "folate_mcg": 12.53,
+                        "water_g": 154.87,
+                        "alcohol_g": null,
+                        "caffeine_mg": null
+                      },
+                      "sources": [
+                        "USDA FoodData Central"
+                      ]
+                    }
+                  },
+                  "usage": {
+                    "monthly_remaining": 1950,
+                    "monthly_limit": 2000,
+                    "daily_remaining": 95,
+                    "daily_limit": 100
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "402": {
+            "$ref": "#/components/responses/LimitExceeded"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        }
+      }
+    },
+    "/api/v1/generate": {
+      "post": {
+        "tags": [
+          "Recipes"
+        ],
+        "summary": "Generate a recipe with nutrition",
+        "description": "Creates a new recipe from structured constraints. Includes USDA-verified nutrition calculation. Requires generate credits (separate from request limits).",
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GenerateRequest"
+              },
+              "example": {
+                "title": "Lemon Herb Chicken",
+                "key_ingredients": [
+                  "chicken breast",
+                  "lemon",
+                  "garlic",
+                  "olive oil"
+                ],
+                "cuisine": "Mediterranean",
+                "difficulty": "Easy",
+                "equipment": [
+                  "skillet"
+                ],
+                "time": 35,
+                "notes": "Weeknight-friendly, bright and zesty."
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "dry_run",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            },
+            "description": "Return usage and generated content without persisting. Only available when ENABLE_GENERATE_DRY_RUN=true."
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Generated recipe",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RecipeResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "502": {
+            "description": "Generation output invalid",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "ApiKeyAuth": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "X-API-Key",
+        "description": "API key in format `rapi_<key>`"
+      }
+    },
+    "schemas": {
+      "RecipeListItem": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string",
+            "example": "Classic Margherita Pizza"
+          },
+          "description": {
+            "type": "string"
+          },
+          "category": {
+            "type": "string",
+            "example": "Dinner"
+          },
+          "cuisine": {
+            "type": "string",
+            "example": "Italian"
+          },
+          "difficulty": {
+            "type": "string",
+            "enum": [
+              "Easy",
+              "Intermediate",
+              "Advanced"
+            ]
+          },
+          "tags": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "meta": {
+            "$ref": "#/components/schemas/RecipeMeta"
+          },
+          "dietary": {
+            "$ref": "#/components/schemas/Dietary"
+          },
+          "nutrition_summary": {
+            "type": "object",
+            "properties": {
+              "calories": {
+                "type": "number",
+                "nullable": true
+              },
+              "protein_g": {
+                "type": "number",
+                "nullable": true
+              },
+              "carbohydrates_g": {
+                "type": "number",
+                "nullable": true
+              },
+              "fat_g": {
+                "type": "number",
+                "nullable": true
+              }
+            }
+          }
+        }
+      },
+      "Recipe": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "category": {
+            "type": "string"
+          },
+          "cuisine": {
+            "type": "string"
+          },
+          "difficulty": {
+            "type": "string"
+          },
+          "tags": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "meta": {
+            "$ref": "#/components/schemas/RecipeMeta"
+          },
+          "dietary": {
+            "$ref": "#/components/schemas/Dietary"
+          },
+          "storage": {
+            "$ref": "#/components/schemas/Storage"
+          },
+          "equipment": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Equipment"
+            }
+          },
+          "ingredients": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/IngredientGroup"
+            }
+          },
+          "instructions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Instruction"
+            }
+          },
+          "troubleshooting": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Troubleshooting"
+            }
+          },
+          "chef_notes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "cultural_context": {
+            "type": "string",
+            "nullable": true
+          },
+          "nutrition": {
+            "$ref": "#/components/schemas/Nutrition"
+          }
+        }
+      },
+      "RecipeMeta": {
+        "type": "object",
+        "description": "Timing and yield information",
+        "properties": {
+          "active_time": {
+            "type": "string",
+            "description": "ISO 8601 duration",
+            "example": "PT45M"
+          },
+          "passive_time": {
+            "type": "string",
+            "description": "ISO 8601 duration",
+            "example": "PT30M"
+          },
+          "total_time": {
+            "type": "string",
+            "description": "ISO 8601 duration",
+            "example": "PT1H15M"
+          },
+          "overnight_required": {
+            "type": "boolean"
+          },
+          "yields": {
+            "type": "string",
+            "example": "4 servings"
+          },
+          "yield_count": {
+            "type": "integer",
+            "example": 4
+          },
+          "serving_size_g": {
+            "type": "number",
+            "nullable": true,
+            "example": 285
+          }
+        }
+      },
+      "Dietary": {
+        "type": "object",
+        "properties": {
+          "flags": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "example": [
+              "Vegetarian",
+              "Gluten-Free"
+            ]
+          },
+          "not_suitable_for": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "example": [
+              "Nut allergy"
+            ]
+          }
+        }
+      },
+      "Storage": {
+        "type": "object",
+        "properties": {
+          "refrigerator": {
+            "type": "object",
+            "nullable": true,
+            "properties": {
+              "duration": {
+                "type": "string",
+                "description": "ISO 8601 duration",
+                "example": "P3D"
+              },
+              "notes": {
+                "type": "string"
+              }
+            }
+          },
+          "freezer": {
+            "type": "object",
+            "nullable": true,
+            "properties": {
+              "duration": {
+                "type": "string",
+                "description": "ISO 8601 duration",
+                "example": "P2M"
+              },
+              "notes": {
+                "type": "string"
+              }
+            }
+          },
+          "reheating": {
+            "type": "string",
+            "nullable": true
+          },
+          "does_not_keep": {
+            "type": "boolean"
+          }
+        }
+      },
+      "Equipment": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "example": "Stand mixer"
+          },
+          "required": {
+            "type": "boolean"
+          },
+          "alternative": {
+            "type": "string",
+            "nullable": true,
+            "example": "Hand mixer"
+          }
+        }
+      },
+      "IngredientGroup": {
+        "type": "object",
+        "properties": {
+          "group_name": {
+            "type": "string",
+            "example": "For the dough"
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Ingredient"
+            }
+          }
+        }
+      },
+      "Ingredient": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "example": "all-purpose flour"
+          },
+          "quantity": {
+            "type": "number",
+            "nullable": true,
+            "example": 2.5
+          },
+          "unit": {
+            "type": "string",
+            "nullable": true,
+            "example": "cups"
+          },
+          "preparation": {
+            "type": "string",
+            "nullable": true,
+            "example": "sifted"
+          },
+          "notes": {
+            "type": "string",
+            "nullable": true
+          },
+          "substitutions": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "ingredient_id": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "nutrition_source": {
+            "type": "string",
+            "nullable": true,
+            "example": "USDA FoodData Central"
+          }
+        }
+      },
+      "Instruction": {
+        "type": "object",
+        "properties": {
+          "step_number": {
+            "type": "integer"
+          },
+          "phase": {
+            "type": "string",
+            "example": "prep",
+            "description": "One of: prep, cook, assemble, finish"
+          },
+          "text": {
+            "type": "string"
+          },
+          "structured": {
+            "$ref": "#/components/schemas/StructuredStep"
+          },
+          "tips": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "StructuredStep": {
+        "type": "object",
+        "nullable": true,
+        "properties": {
+          "action": {
+            "type": "string",
+            "example": "ROAST"
+          },
+          "temperature": {
+            "type": "object",
+            "nullable": true,
+            "properties": {
+              "celsius": {
+                "type": "integer",
+                "example": 200
+              },
+              "fahrenheit": {
+                "type": "integer",
+                "example": 392
+              }
+            }
+          },
+          "duration": {
+            "type": "string",
+            "nullable": true,
+            "description": "ISO 8601 duration",
+            "example": "PT25M"
+          },
+          "doneness_cues": {
+            "type": "object",
+            "nullable": true,
+            "properties": {
+              "visual": {
+                "type": "string",
+                "nullable": true,
+                "example": "Golden brown edges"
+              },
+              "tactile": {
+                "type": "string",
+                "nullable": true,
+                "example": "Springs back when pressed"
+              }
+            }
+          }
+        }
+      },
+      "Troubleshooting": {
+        "type": "object",
+        "properties": {
+          "symptom": {
+            "type": "string",
+            "example": "Dough too sticky"
+          },
+          "likely_cause": {
+            "type": "string",
+            "example": "Too much water or humidity"
+          },
+          "prevention": {
+            "type": "string",
+            "example": "Add flour gradually, check humidity"
+          },
+          "fix": {
+            "type": "string",
+            "example": "Dust with flour while kneading"
+          }
+        }
+      },
+      "Nutrition": {
+        "type": "object",
+        "properties": {
+          "per_serving": {
+            "type": "object",
+            "properties": {
+              "calories": {
+                "type": "number",
+                "nullable": true
+              },
+              "protein_g": {
+                "type": "number",
+                "nullable": true
+              },
+              "carbohydrates_g": {
+                "type": "number",
+                "nullable": true
+              },
+              "fat_g": {
+                "type": "number",
+                "nullable": true
+              },
+              "saturated_fat_g": {
+                "type": "number",
+                "nullable": true
+              },
+              "trans_fat_g": {
+                "type": "number",
+                "nullable": true
+              },
+              "monounsaturated_fat_g": {
+                "type": "number",
+                "nullable": true
+              },
+              "polyunsaturated_fat_g": {
+                "type": "number",
+                "nullable": true
+              },
+              "fiber_g": {
+                "type": "number",
+                "nullable": true
+              },
+              "sugar_g": {
+                "type": "number",
+                "nullable": true
+              },
+              "sodium_mg": {
+                "type": "number",
+                "nullable": true
+              },
+              "cholesterol_mg": {
+                "type": "number",
+                "nullable": true
+              },
+              "potassium_mg": {
+                "type": "number",
+                "nullable": true
+              },
+              "calcium_mg": {
+                "type": "number",
+                "nullable": true
+              },
+              "iron_mg": {
+                "type": "number",
+                "nullable": true
+              },
+              "magnesium_mg": {
+                "type": "number",
+                "nullable": true
+              },
+              "phosphorus_mg": {
+                "type": "number",
+                "nullable": true
+              },
+              "zinc_mg": {
+                "type": "number",
+                "nullable": true
+              },
+              "vitamin_a_mcg": {
+                "type": "number",
+                "nullable": true
+              },
+              "vitamin_c_mg": {
+                "type": "number",
+                "nullable": true
+              },
+              "vitamin_d_mcg": {
+                "type": "number",
+                "nullable": true
+              },
+              "vitamin_e_mg": {
+                "type": "number",
+                "nullable": true
+              },
+              "vitamin_k_mcg": {
+                "type": "number",
+                "nullable": true
+              },
+              "vitamin_b6_mg": {
+                "type": "number",
+                "nullable": true
+              },
+              "vitamin_b12_mcg": {
+                "type": "number",
+                "nullable": true
+              },
+              "thiamin_mg": {
+                "type": "number",
+                "nullable": true
+              },
+              "riboflavin_mg": {
+                "type": "number",
+                "nullable": true
+              },
+              "niacin_mg": {
+                "type": "number",
+                "nullable": true
+              },
+              "folate_mcg": {
+                "type": "number",
+                "nullable": true
+              },
+              "water_g": {
+                "type": "number",
+                "nullable": true
+              },
+              "alcohol_g": {
+                "type": "number",
+                "nullable": true
+              },
+              "caffeine_mg": {
+                "type": "number",
+                "nullable": true
+              }
+            }
+          },
+          "sources": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "example": [
+              "USDA FoodData Central"
+            ]
+          }
+        }
+      },
+      "Error": {
+        "type": "object",
+        "properties": {
+          "error": {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "string"
+              },
+              "message": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      },
+      "Usage": {
+        "type": "object",
+        "description": "API usage information returned with each recipe fetch. Limits vary by plan: Free (100/day), Hobby (500/day), Starter (2,000/day), Pro (50,000/day).",
+        "properties": {
+          "monthly_remaining": {
+            "type": "integer",
+            "description": "Requests remaining this billing period",
+            "example": 1950
+          },
+          "monthly_limit": {
+            "type": "integer",
+            "description": "Total monthly quota",
+            "example": 2000
+          },
+          "daily_remaining": {
+            "type": "integer",
+            "description": "Requests remaining today",
+            "example": 95
+          },
+          "daily_limit": {
+            "type": "integer",
+            "description": "Maximum requests per day",
+            "example": 100
+          }
+        }
+      },
+      "IngredientItem": {
+        "type": "object",
+        "description": "An ingredient from the master ingredients database",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Unique ingredient identifier"
+          },
+          "name": {
+            "type": "string",
+            "example": "Chickpeas, canned, drained"
+          },
+          "category": {
+            "type": "string",
+            "description": "One of 23 canonical categories",
+            "example": "Legumes"
+          },
+          "source": {
+            "type": "string",
+            "description": "Data source: USDA or Aggregated Public Sources",
+            "example": "USDA"
+          }
+        }
+      },
+      "GenerateRequest": {
+        "type": "object",
+        "required": [
+          "title",
+          "key_ingredients",
+          "cuisine",
+          "difficulty",
+          "equipment",
+          "time"
+        ],
+        "properties": {
+          "title": {
+            "type": "string",
+            "maxLength": 80
+          },
+          "key_ingredients": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "minItems": 1
+          },
+          "cuisine": {
+            "type": "string"
+          },
+          "difficulty": {
+            "type": "string",
+            "enum": [
+              "Easy",
+              "Intermediate",
+              "Advanced",
+              "Professional"
+            ]
+          },
+          "equipment": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "minItems": 1
+          },
+          "time": {
+            "type": "integer",
+            "minimum": 5,
+            "maximum": 720,
+            "description": "Target total time in minutes"
+          },
+          "notes": {
+            "type": "string"
+          }
+        }
+      },
+      "RecipeResponse": {
+        "type": "object",
+        "description": "Response from generate endpoint containing the created recipe and usage info",
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/Recipe"
+          },
+          "usage": {
+            "type": "object",
+            "properties": {
+              "daily_remaining": {
+                "type": "integer",
+                "description": "Generate credits remaining today"
+              },
+              "daily_limit": {
+                "type": "integer",
+                "description": "Daily generate credit limit"
+              },
+              "monthly_remaining": {
+                "type": "integer",
+                "description": "Generate credits remaining this month"
+              },
+              "monthly_limit": {
+                "type": "integer",
+                "description": "Monthly generate credit limit"
+              }
+            }
+          }
+        }
+      }
+    },
+    "responses": {
+      "BadRequest": {
+        "description": "Invalid request",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            },
+            "example": {
+              "error": {
+                "code": "BAD_REQUEST",
+                "message": "Invalid recipe ID format. Use UUID."
+              }
+            }
+          }
+        }
+      },
+      "Unauthorized": {
+        "description": "Missing or invalid API key",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            },
+            "example": {
+              "error": {
+                "code": "UNAUTHORIZED",
+                "message": "Missing X-API-Key header"
+              }
+            }
+          }
+        }
+      },
+      "Forbidden": {
+        "description": "API key lacks permission",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            },
+            "example": {
+              "error": {
+                "code": "FORBIDDEN",
+                "message": "This endpoint requires a paid API key."
+              }
+            }
+          }
+        }
+      },
+      "NotFound": {
+        "description": "Resource not found",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            },
+            "example": {
+              "error": {
+                "code": "NOT_FOUND",
+                "message": "Recipe not found"
+              }
+            }
+          }
+        }
+      },
+      "LimitExceeded": {
+        "description": "Monthly credit limit exceeded",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            },
+            "example": {
+              "error": {
+                "code": "LIMIT_EXCEEDED",
+                "message": "Monthly recipe limit reached (1000)."
+              }
+            }
+          }
+        }
+      },
+      "RateLimited": {
+        "description": "Rate limit exceeded",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            },
+            "examples": {
+              "rate_limited": {
+                "summary": "Rate limit exceeded",
+                "value": {
+                  "error": {
+                    "code": "RATE_LIMITED",
+                    "message": "Per-minute rate limit exceeded. Please wait before retrying."
+                  }
+                }
+              },
+              "unique_recipe_limit": {
+                "summary": "Monthly unique recipe limit exceeded",
+                "value": {
+                  "error": {
+                    "code": "UNIQUE_RECIPE_LIMIT_EXCEEDED",
+                    "message": "Monthly unique recipe limit reached (100). You've accessed 100 different recipes this period. Re-requesting previously accessed recipes doesn't count against this limit. Upgrade for more."
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,67 @@
+@startuml
+
+title Weekly Meal Planner
+
+skinparam sequenceMessageAlign center
+skinparam responseMessageBelowArrow true
+skinparam ParticipantPadding 20
+skinparam BoxPadding 10
+
+actor       User       as user
+participant Frontend   as fe    #LightSkyBlue
+participant "Backend\n(Planner API)" as be  #LightBlue
+participant "Recipe API\n(External)" as ext #LightYellow
+database    Database   as db                #LightCoral
+
+' ─────────────────────────────────────────────
+' FLOW 1 — Save Day Plan
+' ─────────────────────────────────────────────
+== Save Day Plan ==
+
+user -> fe  : Open planner for a date
+user -> fe  : Search for recipes
+
+fe  -> ext  : GET /recipes?q=...
+ext --> fe  : Paginated recipe list
+
+fe  --> user : Display search results
+
+user -> fe  : Assign recipes to meal slots\n(BREAKFAST / LUNCH / DINNER / OTHER)
+user -> fe  : Confirm & save
+
+fe  -> be   : POST /planner/save/\n{ date, mealUuids per slot }
+activate be
+
+loop for each recipe UUID
+    be  -> ext  : GET /recipes/{uuid}
+    ext --> be  : Full recipe detail
+    be  -> db   : Cache recipe\n+ persist slot–recipe link
+end
+
+be  --> fe  : 200 OK — resolved DayPlan
+deactivate be
+
+fe  --> user : Display saved meal plan
+
+' ─────────────────────────────────────────────
+' FLOW 2 — View Day Plan
+' ─────────────────────────────────────────────
+== View Day Plan ==
+
+user -> fe  : Navigate to a date
+fe  -> be   : GET /planner/view/day/{date}
+activate be
+
+be  -> db   : Load meal slots for date
+db  --> be  : Slot → recipe UUID rows
+
+be  -> db   : Fetch cached recipes by UUID
+db  --> be  : Recipe records
+
+be  --> fe  : 200 OK — DayPlan
+deactivate be
+
+fe  --> user : Render meal plan\ngrouped by slot
+
+@enduml
+
