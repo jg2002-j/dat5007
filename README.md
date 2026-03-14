@@ -62,6 +62,21 @@ docker compose down -v
 
 ---
 
+## Testing
+
+### Prerequisites
+- Docker must be running before `mvn test`.
+- Tests use Quarkus Dev Services, which starts a PostgreSQL container automatically.
+
+
+### Run tests
+
+```cmd
+mvn test
+```
+
+---
+
 ## API Endpoints
 
 | Method | Path | Description |
