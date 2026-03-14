@@ -1,31 +1,19 @@
 package com.st20313779.repository;
 
-import com.st20313779.model.recipe.Dietary;
-import com.st20313779.model.recipe.Equipment;
-import com.st20313779.model.recipe.Ingredient;
-import com.st20313779.model.recipe.IngredientGroup;
-import com.st20313779.model.recipe.Instruction;
-import com.st20313779.model.recipe.Nutrition;
-import com.st20313779.model.recipe.Recipe;
-import com.st20313779.model.recipe.RecipeMeta;
-import com.st20313779.model.recipe.Storage;
-import com.st20313779.model.recipe.StructuredStep;
-import com.st20313779.model.recipe.Troubleshooting;
+import com.st20313779.model.recipe.*;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
 
 import javax.sql.DataSource;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Types;
+import java.sql.*;
 import java.util.ArrayList;
-import java.util.LinkedHashSet;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 @ApplicationScoped
 public class RecipeRepo {
@@ -73,62 +61,465 @@ public class RecipeRepo {
         }
     }
 
-    public List<Recipe> fetchRecipes(final List<String> uuids) {
+    public Optional<Recipe> getRecipeById(final String uuid) {
+        if (uuid == null || uuid.isBlank()) {
+            throw new IllegalArgumentException("uuid is required");
+        }
+        return getRecipesByIds(List.of(uuid.trim())).stream().findFirst();
+    }
+
+    public List<Recipe> getRecipesByIds(final List<String> uuids) {
         if (uuids == null || uuids.isEmpty()) {
             return List.of();
         }
 
-        final List<String> orderedIds = new ArrayList<>();
-        for (final String uuid : uuids) {
-            if (uuid == null) {
-                continue;
-            }
-            final String trimmed = uuid.trim();
-            if (!trimmed.isEmpty()) {
-                orderedIds.add(trimmed);
-            }
-        }
+        // Preserve order, deduplicate, drop blanks
+        final List<String> orderedIds = uuids.stream()
+                .filter(id -> id != null && !id.isBlank())
+                .map(String::trim)
+                .collect(java.util.stream.Collectors.toCollection(java.util.LinkedHashSet::new))
+                .stream().toList();
+
         if (orderedIds.isEmpty()) {
             return List.of();
         }
 
-        final List<String> distinctIds = new ArrayList<>(new LinkedHashSet<>(orderedIds));
-        final String placeholders = String.join(",", java.util.Collections.nCopies(distinctIds.size(), "?"));
-        final String sql = "select recipe_id, name, description, category, cuisine, difficulty, cultural_context from public.recipe where recipe_id in (" + placeholders + ")";
-
-        final Map<String, Recipe> recipeById = new HashMap<>();
-        try (final Connection conn = ds.getConnection();
-             final PreparedStatement ps = conn.prepareStatement(sql)) {
-            int idx = 1;
-            for (final String id : distinctIds) {
-                ps.setString(idx++, id);
+        try (final Connection conn = ds.getConnection()) {
+            final Map<String, Recipe> byId = fetchBaseRecipes(conn, orderedIds);
+            if (byId.isEmpty()) {
+                return List.of();
             }
+            populateMeta(conn, orderedIds, byId);
+            populateStorage(conn, orderedIds, byId);
+            populateNutrition(conn, orderedIds, byId);
+            populateTags(conn, orderedIds, byId);
+            populateChefNotes(conn, orderedIds, byId);
+            populateDietary(conn, orderedIds, byId);
+            populateEquipment(conn, orderedIds, byId);
+            populateIngredients(conn, orderedIds, byId);
+            populateInstructions(conn, orderedIds, byId);
+            populateTroubleshooting(conn, orderedIds, byId);
 
-            try (final ResultSet rs = ps.executeQuery()) {
-                while (rs.next()) {
-                    final Recipe recipe = new Recipe();
-                    recipe.setId(rs.getString("recipe_id"));
-                    recipe.setName(rs.getString("name"));
-                    recipe.setDescription(rs.getString("description"));
-                    recipe.setCategory(rs.getString("category"));
-                    recipe.setCuisine(rs.getString("cuisine"));
-                    recipe.setDifficulty(rs.getString("difficulty"));
-                    recipe.setCulturalContext(rs.getString("cultural_context"));
-                    recipeById.put(recipe.getId(), recipe);
-                }
-            }
+            return orderedIds.stream()
+                    .filter(byId::containsKey)
+                    .map(byId::get)
+                    .toList();
         } catch (SQLException e) {
             throw new RuntimeException("Failed to fetch recipes", e);
         }
+    }
 
-        final List<Recipe> recipes = new ArrayList<>();
-        for (final String id : orderedIds) {
-            final Recipe recipe = recipeById.get(id);
-            if (recipe != null) {
-                recipes.add(recipe);
+    // ── helpers ───────────────────────────────────────────────────────────────
+
+    private String placeholders(final int n) {
+        return String.join(",", Collections.nCopies(n, "?"));
+    }
+
+    private void bindIds(final PreparedStatement ps, final List<String> ids, final int startIndex) throws SQLException {
+        for (int i = 0; i < ids.size(); i++) {
+            ps.setString(startIndex + i, ids.get(i));
+        }
+    }
+
+    private Map<String, Recipe> fetchBaseRecipes(final Connection conn, final List<String> ids) throws SQLException {
+        final String sql = "select recipe_id, name, description, category, cuisine, difficulty, cultural_context " +
+                           "from public.recipe where recipe_id in (" + placeholders(ids.size()) + ")";
+        try (final PreparedStatement ps = conn.prepareStatement(sql)) {
+            bindIds(ps, ids, 1);
+            try (final ResultSet rs = ps.executeQuery()) {
+                final Map<String, Recipe> byId = new HashMap<>();
+                while (rs.next()) {
+                    final Recipe r = new Recipe();
+                    r.setId(rs.getString("recipe_id"));
+                    r.setName(rs.getString("name"));
+                    r.setDescription(rs.getString("description"));
+                    r.setCategory(rs.getString("category"));
+                    r.setCuisine(rs.getString("cuisine"));
+                    r.setDifficulty(rs.getString("difficulty"));
+                    r.setCulturalContext(rs.getString("cultural_context"));
+                    byId.put(r.getId(), r);
+                }
+                return byId;
             }
         }
-        return recipes;
+    }
+
+    private void populateMeta(final Connection conn, final List<String> ids, final Map<String, Recipe> byId) throws SQLException {
+        final String sql = "select recipe_id, active_time, passive_time, total_time, overnight_required, yields, yield_count, serving_size_g " +
+                           "from public.recipe_meta where recipe_id in (" + placeholders(ids.size()) + ")";
+        try (final PreparedStatement ps = conn.prepareStatement(sql)) {
+            bindIds(ps, ids, 1);
+            try (final ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    final Recipe r = byId.get(rs.getString("recipe_id"));
+                    if (r == null) continue;
+                    final RecipeMeta meta = new RecipeMeta();
+                    meta.setActiveTime(rs.getString("active_time"));
+                    meta.setPassiveTime(rs.getString("passive_time"));
+                    meta.setTotalTime(rs.getString("total_time"));
+                    final boolean overnight = rs.getBoolean("overnight_required");
+                    meta.setOvernightRequired(rs.wasNull() ? null : overnight);
+                    meta.setYields(rs.getString("yields"));
+                    final int yieldCount = rs.getInt("yield_count");
+                    meta.setYieldCount(rs.wasNull() ? null : yieldCount);
+                    final double servingSize = rs.getDouble("serving_size_g");
+                    meta.setServingSizeG(rs.wasNull() ? null : servingSize);
+                    r.setMeta(meta);
+                }
+            }
+        }
+    }
+
+    private void populateStorage(final Connection conn, final List<String> ids, final Map<String, Recipe> byId) throws SQLException {
+        final String sql = "select recipe_id, refrigerator_duration, refrigerator_notes, freezer_duration, freezer_notes, reheating, does_not_keep " +
+                           "from public.recipe_storage where recipe_id in (" + placeholders(ids.size()) + ")";
+        try (final PreparedStatement ps = conn.prepareStatement(sql)) {
+            bindIds(ps, ids, 1);
+            try (final ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    final Recipe r = byId.get(rs.getString("recipe_id"));
+                    if (r == null) continue;
+                    final Storage storage = new Storage();
+                    final String refDuration = rs.getString("refrigerator_duration");
+                    final String refNotes = rs.getString("refrigerator_notes");
+                    if (refDuration != null || refNotes != null) {
+                        storage.setRefrigerator(new Storage.StorageCondition(refDuration, refNotes));
+                    }
+                    final String frzDuration = rs.getString("freezer_duration");
+                    final String frzNotes = rs.getString("freezer_notes");
+                    if (frzDuration != null || frzNotes != null) {
+                        storage.setFreezer(new Storage.StorageCondition(frzDuration, frzNotes));
+                    }
+                    storage.setReheating(rs.getString("reheating"));
+                    final boolean doesNotKeep = rs.getBoolean("does_not_keep");
+                    storage.setDoesNotKeep(rs.wasNull() ? null : doesNotKeep);
+                    r.setStorage(storage);
+                }
+            }
+        }
+    }
+
+    private void populateNutrition(final Connection conn, final List<String> ids, final Map<String, Recipe> byId) throws SQLException {
+        final String sql = "select recipe_id, calories, protein_g, carbohydrates_g, fat_g, saturated_fat_g, trans_fat_g, monounsaturated_fat_g, polyunsaturated_fat_g, fiber_g, sugar_g, sodium_mg, cholesterol_mg, potassium_mg, calcium_mg, iron_mg, magnesium_mg, phosphorus_mg, zinc_mg, vitamin_a_mcg, vitamin_c_mg, vitamin_d_mcg, vitamin_e_mg, vitamin_k_mcg, vitamin_b6_mg, vitamin_b12_mcg, thiamin_mg, riboflavin_mg, niacin_mg, folate_mcg, water_g, alcohol_g, caffeine_mg " +
+                           "from public.recipe_nutrition where recipe_id in (" + placeholders(ids.size()) + ")";
+        try (final PreparedStatement ps = conn.prepareStatement(sql)) {
+            bindIds(ps, ids, 1);
+            try (final ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    final Recipe r = byId.get(rs.getString("recipe_id"));
+                    if (r == null) continue;
+                    final Nutrition.PerServing p = new Nutrition.PerServing();
+                    p.setCalories(nullable(rs, "calories"));
+                    p.setProteinG(nullable(rs, "protein_g"));
+                    p.setCarbohydratesG(nullable(rs, "carbohydrates_g"));
+                    p.setFatG(nullable(rs, "fat_g"));
+                    p.setSaturatedFatG(nullable(rs, "saturated_fat_g"));
+                    p.setTransFatG(nullable(rs, "trans_fat_g"));
+                    p.setMonounsaturatedFatG(nullable(rs, "monounsaturated_fat_g"));
+                    p.setPolyunsaturatedFatG(nullable(rs, "polyunsaturated_fat_g"));
+                    p.setFiberG(nullable(rs, "fiber_g"));
+                    p.setSugarG(nullable(rs, "sugar_g"));
+                    p.setSodiumMg(nullable(rs, "sodium_mg"));
+                    p.setCholesterolMg(nullable(rs, "cholesterol_mg"));
+                    p.setPotassiumMg(nullable(rs, "potassium_mg"));
+                    p.setCalciumMg(nullable(rs, "calcium_mg"));
+                    p.setIronMg(nullable(rs, "iron_mg"));
+                    p.setMagnesiumMg(nullable(rs, "magnesium_mg"));
+                    p.setPhosphorusMg(nullable(rs, "phosphorus_mg"));
+                    p.setZincMg(nullable(rs, "zinc_mg"));
+                    p.setVitaminAMcg(nullable(rs, "vitamin_a_mcg"));
+                    p.setVitaminCMg(nullable(rs, "vitamin_c_mg"));
+                    p.setVitaminDMcg(nullable(rs, "vitamin_d_mcg"));
+                    p.setVitaminEMg(nullable(rs, "vitamin_e_mg"));
+                    p.setVitaminKMcg(nullable(rs, "vitamin_k_mcg"));
+                    p.setVitaminB6Mg(nullable(rs, "vitamin_b6_mg"));
+                    p.setVitaminB12Mcg(nullable(rs, "vitamin_b12_mcg"));
+                    p.setThiaminMg(nullable(rs, "thiamin_mg"));
+                    p.setRiboflavinMg(nullable(rs, "riboflavin_mg"));
+                    p.setNiacinMg(nullable(rs, "niacin_mg"));
+                    p.setFolateMcg(nullable(rs, "folate_mcg"));
+                    p.setWaterG(nullable(rs, "water_g"));
+                    p.setAlcoholG(nullable(rs, "alcohol_g"));
+                    p.setCaffeineMg(nullable(rs, "caffeine_mg"));
+                    r.setNutrition(new Nutrition(p, new ArrayList<>()));
+                }
+            }
+        }
+        // Nutrition sources
+        final String srcSql = "select recipe_id, source from public.recipe_nutrition_source " +
+                              "where recipe_id in (" + placeholders(ids.size()) + ") order by recipe_id, position";
+        try (final PreparedStatement ps = conn.prepareStatement(srcSql)) {
+            bindIds(ps, ids, 1);
+            try (final ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    final Recipe r = byId.get(rs.getString("recipe_id"));
+                    if (r == null || r.getNutrition() == null) continue;
+                    r.getNutrition().getSources().add(rs.getString("source"));
+                }
+            }
+        }
+    }
+
+    private void populateTags(final Connection conn, final List<String> ids, final Map<String, Recipe> byId) throws SQLException {
+        final String sql = "select recipe_id, tag from public.recipe_tag " +
+                           "where recipe_id in (" + placeholders(ids.size()) + ") order by recipe_id, position";
+        try (final PreparedStatement ps = conn.prepareStatement(sql)) {
+            bindIds(ps, ids, 1);
+            try (final ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    final Recipe r = byId.get(rs.getString("recipe_id"));
+                    if (r == null) continue;
+                    if (r.getTags() == null) r.setTags(new ArrayList<>());
+                    r.getTags().add(rs.getString("tag"));
+                }
+            }
+        }
+    }
+
+    private void populateChefNotes(final Connection conn, final List<String> ids, final Map<String, Recipe> byId) throws SQLException {
+        final String sql = "select recipe_id, note from public.recipe_chef_note " +
+                           "where recipe_id in (" + placeholders(ids.size()) + ") order by recipe_id, position";
+        try (final PreparedStatement ps = conn.prepareStatement(sql)) {
+            bindIds(ps, ids, 1);
+            try (final ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    final Recipe r = byId.get(rs.getString("recipe_id"));
+                    if (r == null) continue;
+                    if (r.getChefNotes() == null) r.setChefNotes(new ArrayList<>());
+                    r.getChefNotes().add(rs.getString("note"));
+                }
+            }
+        }
+    }
+
+    private void populateDietary(final Connection conn, final List<String> ids, final Map<String, Recipe> byId) throws SQLException {
+        // Flags
+        final String flagSql = "select recipe_id, flag from public.recipe_dietary_flag " +
+                               "where recipe_id in (" + placeholders(ids.size()) + ") order by recipe_id, position";
+        try (final PreparedStatement ps = conn.prepareStatement(flagSql)) {
+            bindIds(ps, ids, 1);
+            try (final ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    final Recipe r = byId.get(rs.getString("recipe_id"));
+                    if (r == null) continue;
+                    if (r.getDietary() == null) r.setDietary(new Dietary());
+                    if (r.getDietary().getFlags() == null) r.getDietary().setFlags(new ArrayList<>());
+                    r.getDietary().getFlags().add(rs.getString("flag"));
+                }
+            }
+        }
+        // Not suitable for
+        final String notSuitSql = "select recipe_id, item from public.recipe_dietary_not_suitable " +
+                                  "where recipe_id in (" + placeholders(ids.size()) + ") order by recipe_id, position";
+        try (final PreparedStatement ps = conn.prepareStatement(notSuitSql)) {
+            bindIds(ps, ids, 1);
+            try (final ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    final Recipe r = byId.get(rs.getString("recipe_id"));
+                    if (r == null) continue;
+                    if (r.getDietary() == null) r.setDietary(new Dietary());
+                    if (r.getDietary().getNotSuitableFor() == null) r.getDietary().setNotSuitableFor(new ArrayList<>());
+                    r.getDietary().getNotSuitableFor().add(rs.getString("item"));
+                }
+            }
+        }
+    }
+
+    private void populateEquipment(final Connection conn, final List<String> ids, final Map<String, Recipe> byId) throws SQLException {
+        final String sql = "select recipe_id, name, required, alternative from public.recipe_equipment " +
+                           "where recipe_id in (" + placeholders(ids.size()) + ") order by recipe_id, position";
+        try (final PreparedStatement ps = conn.prepareStatement(sql)) {
+            bindIds(ps, ids, 1);
+            try (final ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    final Recipe r = byId.get(rs.getString("recipe_id"));
+                    if (r == null) continue;
+                    if (r.getEquipment() == null) r.setEquipment(new ArrayList<>());
+                    final Equipment eq = new Equipment();
+                    eq.setName(rs.getString("name"));
+                    final boolean required = rs.getBoolean("required");
+                    eq.setRequired(rs.wasNull() ? null : required);
+                    eq.setAlternative(rs.getString("alternative"));
+                    r.getEquipment().add(eq);
+                }
+            }
+        }
+    }
+
+    private void populateIngredients(final Connection conn, final List<String> ids, final Map<String, Recipe> byId) throws SQLException {
+        // Groups: Map<recipeId, Map<groupPosition, IngredientGroup>>
+        final Map<String, Map<Integer, IngredientGroup>> groupsByRecipe = new LinkedHashMap<>();
+        final String groupSql = "select recipe_id, position, group_name from public.recipe_ingredient_group " +
+                                "where recipe_id in (" + placeholders(ids.size()) + ") order by recipe_id, position";
+        try (final PreparedStatement ps = conn.prepareStatement(groupSql)) {
+            bindIds(ps, ids, 1);
+            try (final ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    final String recipeId = rs.getString("recipe_id");
+                    final IngredientGroup group = new IngredientGroup();
+                    group.setGroupName(rs.getString("group_name"));
+                    group.setItems(new ArrayList<>());
+                    groupsByRecipe.computeIfAbsent(recipeId, k -> new LinkedHashMap<>())
+                                  .put(rs.getInt("position"), group);
+                }
+            }
+        }
+
+        // Ingredients: Map<recipeId, Map<groupPos, Map<ingredientPos, Ingredient>>>
+        final Map<String, Map<Integer, Map<Integer, Ingredient>>> ingredientsByRecipe = new LinkedHashMap<>();
+        final String ingSql = "select recipe_id, group_position, position, name, quantity, unit, preparation, notes, ingredient_id, nutrition_source " +
+                              "from public.recipe_ingredient where recipe_id in (" + placeholders(ids.size()) + ") " +
+                              "order by recipe_id, group_position, position";
+        try (final PreparedStatement ps = conn.prepareStatement(ingSql)) {
+            bindIds(ps, ids, 1);
+            try (final ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    final String recipeId = rs.getString("recipe_id");
+                    final int groupPos = rs.getInt("group_position");
+                    final int pos = rs.getInt("position");
+                    final Ingredient ing = new Ingredient();
+                    ing.setName(rs.getString("name"));
+                    final double qty = rs.getDouble("quantity");
+                    ing.setQuantity(rs.wasNull() ? null : qty);
+                    ing.setUnit(rs.getString("unit"));
+                    ing.setPreparation(rs.getString("preparation"));
+                    ing.setNotes(rs.getString("notes"));
+                    ing.setIngredientId(rs.getString("ingredient_id"));
+                    ing.setNutritionSource(rs.getString("nutrition_source"));
+                    ing.setSubstitutions(new ArrayList<>());
+                    ingredientsByRecipe.computeIfAbsent(recipeId, k -> new LinkedHashMap<>())
+                                       .computeIfAbsent(groupPos, k -> new LinkedHashMap<>())
+                                       .put(pos, ing);
+                    // Attach to group
+                    final Map<Integer, IngredientGroup> groups = groupsByRecipe.get(recipeId);
+                    if (groups != null && groups.containsKey(groupPos)) {
+                        groups.get(groupPos).getItems().add(ing);
+                    }
+                }
+            }
+        }
+
+        // Substitutions
+        final String subSql = "select recipe_id, group_position, ingredient_position, substitution " +
+                              "from public.recipe_ingredient_substitution where recipe_id in (" + placeholders(ids.size()) + ") " +
+                              "order by recipe_id, group_position, ingredient_position, position";
+        try (final PreparedStatement ps = conn.prepareStatement(subSql)) {
+            bindIds(ps, ids, 1);
+            try (final ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    final String recipeId = rs.getString("recipe_id");
+                    final Map<Integer, Map<Integer, Ingredient>> groups = ingredientsByRecipe.get(recipeId);
+                    if (groups == null) continue;
+                    final Map<Integer, Ingredient> ingredients = groups.get(rs.getInt("group_position"));
+                    if (ingredients == null) continue;
+                    final Ingredient ing = ingredients.get(rs.getInt("ingredient_position"));
+                    if (ing == null) continue;
+                    ing.getSubstitutions().add(rs.getString("substitution"));
+                }
+            }
+        }
+
+        // Set on recipes
+        groupsByRecipe.forEach((recipeId, groupMap) -> {
+            final Recipe r = byId.get(recipeId);
+            if (r != null) r.setIngredients(new ArrayList<>(groupMap.values()));
+        });
+    }
+
+    private void populateInstructions(final Connection conn, final List<String> ids, final Map<String, Recipe> byId) throws SQLException {
+        // Map<recipeId, Map<position, Instruction>>
+        final Map<String, Map<Integer, Instruction>> instructionsByRecipe = new LinkedHashMap<>();
+        final String instrSql = "select recipe_id, position, step_number, phase, text, structured_action, structured_duration, " +
+                                "temperature_celsius, temperature_fahrenheit, doneness_visual, doneness_tactile " +
+                                "from public.recipe_instruction where recipe_id in (" + placeholders(ids.size()) + ") " +
+                                "order by recipe_id, position";
+        try (final PreparedStatement ps = conn.prepareStatement(instrSql)) {
+            bindIds(ps, ids, 1);
+            try (final ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    final String recipeId = rs.getString("recipe_id");
+                    final Instruction instr = new Instruction();
+                    final int stepNum = rs.getInt("step_number");
+                    instr.setStepNumber(rs.wasNull() ? null : stepNum);
+                    instr.setPhase(rs.getString("phase"));
+                    instr.setText(rs.getString("text"));
+                    instr.setTips(new ArrayList<>());
+                    // Structured step
+                    final String action = rs.getString("structured_action");
+                    final String duration = rs.getString("structured_duration");
+                    final int tempC = rs.getInt("temperature_celsius");
+                    final Integer tempCVal = rs.wasNull() ? null : tempC;
+                    final int tempF = rs.getInt("temperature_fahrenheit");
+                    final Integer tempFVal = rs.wasNull() ? null : tempF;
+                    final String visual = rs.getString("doneness_visual");
+                    final String tactile = rs.getString("doneness_tactile");
+                    if (action != null || duration != null || tempCVal != null || tempFVal != null || visual != null || tactile != null) {
+                        final StructuredStep structured = new StructuredStep();
+                        structured.setAction(action);
+                        structured.setDuration(duration);
+                        if (tempCVal != null || tempFVal != null) {
+                            structured.setTemperature(new StructuredStep.Temperature(tempCVal, tempFVal));
+                        }
+                        if (visual != null || tactile != null) {
+                            structured.setDonenessCues(new StructuredStep.DonenessCues(visual, tactile));
+                        }
+                        instr.setStructured(structured);
+                    }
+                    instructionsByRecipe.computeIfAbsent(recipeId, k -> new LinkedHashMap<>())
+                                        .put(rs.getInt("position"), instr);
+                }
+            }
+        }
+
+        // Tips
+        final String tipSql = "select recipe_id, instruction_position, tip from public.recipe_instruction_tip " +
+                              "where recipe_id in (" + placeholders(ids.size()) + ") order by recipe_id, instruction_position, position";
+        try (final PreparedStatement ps = conn.prepareStatement(tipSql)) {
+            bindIds(ps, ids, 1);
+            try (final ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    final String recipeId = rs.getString("recipe_id");
+                    final Map<Integer, Instruction> instructions = instructionsByRecipe.get(recipeId);
+                    if (instructions == null) continue;
+                    final Instruction instr = instructions.get(rs.getInt("instruction_position"));
+                    if (instr == null) continue;
+                    instr.getTips().add(rs.getString("tip"));
+                }
+            }
+        }
+
+        // Set on recipes
+        instructionsByRecipe.forEach((recipeId, instrMap) -> {
+            final Recipe r = byId.get(recipeId);
+            if (r != null) r.setInstructions(new ArrayList<>(instrMap.values()));
+        });
+    }
+
+    private void populateTroubleshooting(final Connection conn, final List<String> ids, final Map<String, Recipe> byId) throws SQLException {
+        final String sql = "select recipe_id, symptom, likely_cause, prevention, fix from public.recipe_troubleshooting " +
+                           "where recipe_id in (" + placeholders(ids.size()) + ") order by recipe_id, position";
+        try (final PreparedStatement ps = conn.prepareStatement(sql)) {
+            bindIds(ps, ids, 1);
+            try (final ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    final Recipe r = byId.get(rs.getString("recipe_id"));
+                    if (r == null) continue;
+                    if (r.getTroubleshooting() == null) r.setTroubleshooting(new ArrayList<>());
+                    final Troubleshooting t = new Troubleshooting();
+                    t.setSymptom(rs.getString("symptom"));
+                    t.setLikelyCause(rs.getString("likely_cause"));
+                    t.setPrevention(rs.getString("prevention"));
+                    t.setFix(rs.getString("fix"));
+                    r.getTroubleshooting().add(t);
+                }
+            }
+        }
+    }
+
+    /** Reads a nullable DOUBLE column, returning null if SQL NULL. */
+    private Double nullable(final ResultSet rs, final String col) throws SQLException {
+        final double val = rs.getDouble(col);
+        return rs.wasNull() ? null : val;
     }
 
     private void insertRecipeMeta(final Connection conn, final String recipeId, final RecipeMeta meta) throws SQLException {

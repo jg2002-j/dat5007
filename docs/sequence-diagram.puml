@@ -33,19 +33,25 @@ fe  --> user : Display search results
 user -> fe  : Assign recipes to meal slots\n(BREAKFAST / LUNCH / DINNER / OTHER)
 user -> fe  : Confirm & save
 
-fe  -> be   : POST /planner/save/\n{ date, mealUuids per slot }
+fe  -> be   : POST /planner/save/day\n{ date, mealUuids per slot }
 activate be
 
 loop for each recipe UUID
     be  -> ext  : GET /recipes/{uuid}
     ext --> be  : Full recipe detail
-    be  -> db   : Cache recipe\n+ persist slot–recipe link
 end
 
-be  --> fe  : 200 OK — resolved DayPlan
-deactivate be
+be  -> be   : Build DayPlan\n(slot -> meals with full recipe info)
 
-fe  --> user : Display saved meal plan
+par Return resolved plan
+    be  --> fe  : 200 OK — resolved DayPlan
+    fe  --> user : Display saved meal plan
+else Persist DayPlan data
+    be  -> db   : Upsert full recipes into recipes tables
+    be  -> db   : Upsert slot-uuid links into meals table
+end
+
+deactivate be
 
 ' ─────────────────────────────────────────────
 ' FLOW 2 — View Day Plan

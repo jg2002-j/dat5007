@@ -1,0 +1,133 @@
+@startuml
+
+title Weekly Meal Planner - Class Diagram
+
+skinparam classAttributeIconSize 0
+skinparam packageStyle rectangle
+skinparam linetype ortho
+hide empty members
+
+package "controller" {
+  class PlannerEndpoint {
+    +getRecipes(...): RecipeListResponse
+    +saveDayPlan(dto: DayMealsDto): DayPlan
+    +getDayPlan(date: LocalDate): DayPlan
+  }
+}
+
+package "service" {
+  class PlannerService {
+    +saveDayPlan(dto: DayMealsDto): DayPlan
+    +getDayPlan(date: LocalDate): DayPlan
+  }
+
+  class RecipeService {
+    +getRecipes(...): RecipeListResponse
+    +getRecipeById(uuid: String): Recipe
+  }
+
+  interface RecipeClient {
+    +getRecipes(...): RecipeListResponse
+    +getRecipeById(apiKey: String, id: UUID): RecipeResponse
+  }
+}
+
+package "repository" {
+  class PlannerRepo {
+    +saveSlotMealUuid(date: Date, slot: MealSlot, uuid: String): void
+    +getDayPlan(date: Date): DayMealsDto
+  }
+
+  class RecipeRepo {
+    +saveRecipe(recipe: Recipe): void
+    +getRecipeById(uuid: String): Optional<Recipe>
+    +getRecipesByIds(uuids: List<String>): List<Recipe>
+  }
+}
+
+package "repository.dto" {
+  class DayMealsDto {
+    +date: Date
+    +mealUuids: Map<MealSlot, List<String>>
+  }
+}
+
+package "model" {
+  class DayPlan {
+    +date: LocalDate
+    +meals: Map<MealSlot, List<Recipe>>
+  }
+
+  enum MealSlot {
+    BREAKFAST
+    LUNCH
+    DINNER
+    OTHER
+  }
+}
+
+package "model.recipe" {
+  class Recipe {
+    +id: String
+    +name: String
+    +description: String
+    +category: String
+    +cuisine: String
+    +difficulty: String
+  }
+
+  class RecipeMeta
+  class Dietary
+  class Storage
+  class Equipment
+  class IngredientGroup
+  class Ingredient
+  class Instruction
+  class StructuredStep
+  class Troubleshooting
+  class Nutrition
+  class RecipeResponse
+  class RecipeListResponse
+  class RecipeListItem
+  class RecipeListMeta
+}
+
+' Layer dependencies
+PlannerEndpoint --> PlannerService
+PlannerEndpoint --> RecipeService
+PlannerService --> PlannerRepo
+PlannerService --> RecipeService
+PlannerService --> RecipeRepo
+RecipeService --> RecipeClient
+RecipeService --> RecipeRepo
+
+' DTO / domain usage
+PlannerEndpoint ..> DayMealsDto
+PlannerEndpoint ..> DayPlan
+PlannerRepo ..> DayMealsDto
+PlannerService ..> DayMealsDto
+PlannerService ..> DayPlan
+
+DayMealsDto --> MealSlot
+DayPlan --> MealSlot
+DayPlan --> "*" Recipe : meals by slot
+
+' Recipe API wrappers
+RecipeResponse --> Recipe
+RecipeListResponse --> RecipeListMeta
+RecipeListResponse --> "*" RecipeListItem
+
+' Recipe composition
+Recipe *-- RecipeMeta
+Recipe *-- Dietary
+Recipe *-- Storage
+Recipe *-- "*" Equipment
+Recipe *-- "*" IngredientGroup
+IngredientGroup *-- "*" Ingredient
+Recipe *-- "*" Instruction
+Instruction *-- StructuredStep
+Recipe *-- "*" Troubleshooting
+Recipe *-- Nutrition
+
+@enduml
+

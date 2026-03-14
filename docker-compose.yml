@@ -1,0 +1,17 @@
+services:
+  postgres:
+    image: postgres:16
+    container_name: meal_planner_db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: meal_planner
+      POSTGRES_USER: planner
+      POSTGRES_PASSWORD: planner
+    ports:
+      - "5432:5432"
+    volumes:
+      - meal_planner_data:/var/lib/postgresql/data
+
+volumes:
+  meal_planner_data:
+

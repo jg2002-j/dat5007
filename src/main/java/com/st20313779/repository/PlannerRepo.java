@@ -9,6 +9,7 @@ import lombok.extern.slf4j.Slf4j;
 
 import javax.sql.DataSource;
 import java.sql.*;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
@@ -18,6 +19,21 @@ public class PlannerRepo {
 
     @Inject
     DataSource ds;
+
+    @Transactional
+    public void saveSlotMealUuid(final Date date, final MealSlot slot, final String uuid) {
+        try (
+                final Connection conn = ds.getConnection();
+                final PreparedStatement ps = conn.prepareStatement("insert into public.meals (tdate, slot, recipe_uuid) values (?, ?, ?)")
+        ) {
+            ps.setDate(1, date);
+            ps.setString(2, String.valueOf(slot));
+            ps.setString(3, uuid);
+            ps.executeUpdate();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
 
     @Transactional
     public DayMealsDto getDayPlan(final Date date) {
@@ -33,7 +49,7 @@ public class PlannerRepo {
                 while (rs.next()) {
                     final MealSlot slot = rs.getString("slot") != null ? MealSlot.valueOf(rs.getString("slot")) : MealSlot.OTHER;
                     final String uuid = rs.getString("recipe_uuid");
-                    final List<String> recipes = meals.getMealUuids().getOrDefault(slot, List.of());
+                    final List<String> recipes = meals.getMealUuids().computeIfAbsent(slot, ignored -> new ArrayList<>());
                     recipes.add(uuid);
                     meals.getMealUuids().put(slot, recipes);
                 }
