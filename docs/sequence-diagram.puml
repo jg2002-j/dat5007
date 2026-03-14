@@ -21,8 +21,12 @@ database    Database   as db                #LightCoral
 user -> fe  : Open planner for a date
 user -> fe  : Search for recipes
 
-fe  -> ext  : GET /recipes?q=...
-ext --> fe  : Paginated recipe list
+fe  -> be   : GET /planner/recipes?q=...
+activate be
+be  -> ext  : GET /recipes?q=...
+ext --> be  : Paginated recipe list
+be  --> fe  : Paginated recipe list
+deactivate be
 
 fe  --> user : Display search results
 
