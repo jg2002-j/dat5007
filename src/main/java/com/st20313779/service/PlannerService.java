@@ -16,6 +16,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 @ApplicationScoped
 public class PlannerService {
@@ -53,7 +54,8 @@ public class PlannerService {
                 }
 
                 final List<Recipe> recipes = new ArrayList<>();
-                for (final String uuid : slotEntry.getValue() == null ? List.<String>of() : slotEntry.getValue()) {
+                final List<String> uuids = slotEntry.getValue();
+                for (final String uuid : uuids == null ? List.<String>of() : uuids.stream().filter(Objects::nonNull).toList()) {
                     final String trimmedUuid = uuid.trim();
                     if (trimmedUuid.isBlank()) {
                         continue;

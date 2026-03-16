@@ -11,6 +11,7 @@ import jakarta.ws.rs.*;
 import org.eclipse.microprofile.openapi.annotations.parameters.RequestBody;
 
 import java.time.LocalDate;
+import java.time.format.DateTimeParseException;
 
 @Path("planner")
 @ApplicationScoped
@@ -37,20 +38,48 @@ public class PlannerEndpoint {
             @QueryParam("page") Integer page,
             @QueryParam("per_page") Integer perPage
     ) {
-        return recipeService.getRecipes(nameOrDesc, category, cuisine, difficulty, dietary, ingredients, page, perPage);
+        try {
+            return recipeService.getRecipes(nameOrDesc, category, cuisine, difficulty, dietary, ingredients, page, perPage);
+        } catch (RuntimeException ex) {
+            throw mapServiceFailure(ex);
+        }
     }
 
 
     @POST
     @Path("/save/day")
     public DayPlan saveDayPlan(@RequestBody final DayMealsDto dto) {
-        return plannerService.saveDayPlan(dto);
+        try {
+            return plannerService.saveDayPlan(dto);
+        } catch (RuntimeException ex) {
+            throw mapServiceFailure(ex);
+        }
     }
 
     @GET
     @Path("/view/day/{date}")
-    public DayPlan getDayPlan(@PathParam("date") final LocalDate date) {
-        return plannerService.getDayPlan(date);
+    public DayPlan getDayPlan(@PathParam("date") final String date) {
+        final LocalDate parsedDate = parseDate(date);
+        try {
+            return plannerService.getDayPlan(parsedDate);
+        } catch (RuntimeException ex) {
+            throw mapServiceFailure(ex);
+        }
+    }
+
+    private LocalDate parseDate(final String date) {
+        try {
+            return LocalDate.parse(date);
+        } catch (DateTimeParseException ex) {
+            throw new BadRequestException("Invalid date format. Expected ISO-8601 yyyy-MM-dd", ex);
+        }
+    }
+
+    private RuntimeException mapServiceFailure(final RuntimeException ex) {
+        if (ex instanceof IllegalArgumentException || ex instanceof WebApplicationException || ex instanceof ServiceLayerException) {
+            return ex;
+        }
+        return new ServiceLayerException("Service layer failure", ex);
     }
 
 }
