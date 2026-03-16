@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<FindBugsFilter>
+    <!-- Ignore all domain model classes and subpackages. -->
+    <Match>
+        <Class name="~com\.st20313779\.model\..*"/>
+    </Match>
+    <Match>
+        <Class name="~com\.st20313779\.repository\.dto\..*"/>
+    </Match>
+</FindBugsFilter>
+

@@ -7,7 +7,7 @@ import org.junit.jupiter.api.Test;
 import static io.restassured.RestAssured.given;
 
 @QuarkusTest
-class PlannerEndpointTest {
+class PlannerEndpointIT {
 
     @Test
     void saveDayPlan_returns200_forValidRequest() {
