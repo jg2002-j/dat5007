@@ -1,6 +1,7 @@
 package com.st20313779.controller;
 
 import com.st20313779.model.DayPlan;
+import com.st20313779.model.recipe.RecipeListResponse;
 import com.st20313779.service.PlannerService;
 import com.st20313779.service.RecipeService;
 import io.quarkus.test.InjectMock;
@@ -43,6 +44,18 @@ class PlannerEndpointIT {
     }
 
     @Test
+    void equivalencePartition_getDayPlan_shouldReturn400_forAlphabeticInput() {
+        // Arrange
+
+        // Act + Assert
+        given()
+                .when()
+                .get("/planner/view/day/{date}", "not-a-date")
+                .then()
+                .statusCode(400);
+    }
+
+    @Test
     void equivalencePartition_getDayPlan_shouldReturn400_forWrongDelimiter() {
         // Arrange
 
@@ -54,17 +67,6 @@ class PlannerEndpointIT {
                 .statusCode(400);
     }
 
-    @Test
-    void equivalencePartition_getDayPlan_shouldReturn400_forAlphabeticInput() {
-        // Arrange
-
-        // Act + Assert
-        given()
-                .when()
-                .get("/planner/view/day/{date}", "not-a-date")
-                .then()
-                .statusCode(400);
-    }
 
     @Test
     void equivalencePartition_getDayPlan_shouldReturn400_forCalendarInvalidDate() {
@@ -187,6 +189,52 @@ class PlannerEndpointIT {
                 .statusCode(502)
                 .body("status", equalTo(502))
                 .body("error", equalTo("Bad Gateway"))
+                .body("message", equalTo("Service layer failure"));
+    }
+
+    @Test
+    void integrationContract_getRecipes_shouldReturn200_whenRecipeServiceSucceeds() {
+        // Arrange
+        when(recipeService.getRecipes(any(), any(), any(), any(), any(), any(), any(), any()))
+                .thenReturn(new RecipeListResponse());
+
+        // Act + Assert
+        given()
+                .when()
+                .get("/planner/recipes?q=tomato")
+                .then()
+                .statusCode(200);
+    }
+
+    @Test
+    void integrationContract_getRecipes_shouldReturn502_whenRecipeServiceThrowsRuntimeException() {
+        // Arrange
+        when(recipeService.getRecipes(any(), any(), any(), any(), any(), any(), any(), any()))
+                .thenThrow(new RuntimeException("upstream unavailable"));
+
+        // Act + Assert
+        given()
+                .when()
+                .get("/planner/recipes?q=tomato")
+                .then()
+                .statusCode(502)
+                .body("status", equalTo(502))
+                .body("message", equalTo("Service layer failure"));
+    }
+
+    @Test
+    void integrationContract_getDayPlan_shouldPreserveServiceLayerExceptionAndUseMapperDefaultMessageWhenNull() {
+        // Arrange
+        LocalDate date = LocalDate.parse("2026-03-16");
+        when(plannerService.getDayPlan(date)).thenThrow(new ServiceLayerException(null, new RuntimeException("cause")));
+
+        // Act + Assert
+        given()
+                .when()
+                .get("/planner/view/day/{date}", "2026-03-16")
+                .then()
+                .statusCode(502)
+                .body("status", equalTo(502))
                 .body("message", equalTo("Service layer failure"));
     }
 
