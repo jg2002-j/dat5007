@@ -158,7 +158,8 @@ public class PlannerServiceTest {
         DayPlan result = plannerService.saveDayPlan(dto);
 
         assertNotNull(result, "DayPlan should not be null");
-        assertTrue(result.getMeals().isEmpty(), "Meals map should be empty when all UUIDs are blank");
+        assertTrue(result.getMeals().containsKey(MealSlot.BREAKFAST), "Slot should be present even when UUIDs are blank");
+        assertTrue(result.getMeals().get(MealSlot.BREAKFAST).isEmpty(), "Recipes list should be empty when all UUIDs are blank");
         verify(recipeService, never()).getRecipeById(anyString());
     }
 
