@@ -21,7 +21,6 @@ A Quarkus REST API that stores and retrieves daily meal plans. Each plan maps a 
 
 ### Prerequisites
 - Java 21
-- Maven
 - Docker Desktop
 
 ### 1. Start the database
@@ -45,6 +44,8 @@ Flyway runs automatically on app startup and applies all migrations in `src/main
 
 ```cmd
 ./mvnw quarkus:dev
+# Windows PowerShell alternative:
+# .\mvnw.cmd quarkus:dev
 ```
 
 ### Database lifecycle
@@ -65,14 +66,16 @@ docker compose down -v
 ## Testing
 
 ### Prerequisites
-- Docker must be running before `mvn test`.
+- Docker must be running before wrapper-based test execution.
 - Tests use Quarkus Dev Services, which starts a PostgreSQL container automatically.
 
 
 ### Run tests
 
 ```cmd
-mvn test
+./mvnw test
+# Windows PowerShell alternative:
+# .\mvnw.cmd test
 ```
 
 ---

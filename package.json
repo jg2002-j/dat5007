@@ -1,0 +1,28 @@
+{
+  "name": "dat5007",
+  "version": "1.0.0",
+  "description": "A Quarkus REST API that stores and retrieves daily meal plans. Each plan maps a date to one or more meal slots (Breakfast, Lunch, Dinner, Other), each containing a list of recipes fetched from an external Recipe API and cached locally.",
+  "main": "index.js",
+  "directories": {
+    "doc": "docs"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "cypress:open": "cypress open",
+    "cypress:run": "cypress run"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jg2002-j/dat5007.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/jg2002-j/dat5007/issues"
+  },
+  "homepage": "https://github.com/jg2002-j/dat5007#readme",
+  "devDependencies": {
+    "cypress": "^15.14.1"
+  }
+}

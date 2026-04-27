@@ -1,0 +1,63 @@
+{
+  "recipes": {
+    "valid": {
+      "id": "550e8400-e29b-41d4-a716-446655440000",
+      "name": "Pasta Carbonara",
+      "description": "Classic Italian pasta dish",
+      "category": "Main Course",
+      "cuisine": "Italian",
+      "difficulty": "Medium"
+    },
+    "minimalValid": {
+      "id": "550e8400-e29b-41d4-a716-446655440001",
+      "name": "X"
+    },
+    "complexValid": {
+      "id": "550e8400-e29b-41d4-a716-446655440002",
+      "name": "Pasta with 50 characters in the name for boundary",
+      "description": "Complex recipe with all optional fields",
+      "category": "Appetizer",
+      "cuisine": "French",
+      "difficulty": "Hard",
+      "tags": ["vegan", "gluten-free"],
+      "chefNotes": ["Note 1", "Note 2"]
+    }
+  },
+  "boundaryValues": {
+    "stringLengths": {
+      "minLength": 1,
+      "maxLength": 50,
+      "overMax": 51,
+      "empty": "",
+      "blank": "   "
+    },
+    "dates": {
+      "validDate": "2026-04-27",
+      "minBoundaryDate": "1900-01-01",
+      "maxBoundaryDate": "2099-12-31",
+      "invalidFormat": "27-04-2026",
+      "partialFormat": "2026-04"
+    },
+    "uuids": {
+      "validUuid": "550e8400-e29b-41d4-a716-446655440000",
+      "invalidUuid": "not-a-uuid",
+      "nullUuid": null,
+      "emptyUuid": "",
+      "duplicateUuid": "550e8400-e29b-41d4-a716-446655440000"
+    }
+  },
+  "equivalencePartitions": {
+    "recipeSearch": {
+      "partition1_validString": "pasta",
+      "partition2_emptyString": "",
+      "partition3_specialChars": "café@#$%"
+    },
+    "mealSlots": {
+      "breakfast": "BREAKFAST",
+      "lunch": "LUNCH",
+      "dinner": "DINNER",
+      "other": "OTHER"
+    }
+  }
+}
+
