@@ -1,0 +1,64 @@
+1. Foundations of Software Testing
+•	The Core Philosophy: Testing identifies defects but does not inherently improve software; it provides the information needed to resolve issues.
+•	Cost of Quality: Software failures are immensely costly; testing ensures reliability and reduces the "Cost of Poor Software Quality".
+•	Testability: Defined by how easily a system facilitates test criteria and execution. It relies on:
+o	Observability: How easily you can see the results of test execution.
+o	Controllability: How easily you can provide input values to the software.
+2. Software Testing Life Cycle (STLC)
+The STLC is a sequence of systematic activities to ensure software quality, distinct from the broader SDLC.
+•	Phase 1: Requirement Analysis: Examine requirements to identify testable features. Use a Requirement Traceability Matrix (RTM) to map every requirement to a corresponding test case—a requirement for your report.
+•	Phase 2: Test Planning: Define strategy, resources, and schedule.
+•	Phase 3: Test Case Development: Create test cases including Pre-conditions, Inputs, Expected Results, and Post-conditions.
+•	Phase 4: Environment Setup: Prepare hardware and software.
+•	Phase 5: Test Execution: Run tests and compare actual vs. expected outcomes.
+•	Phase 6: Test Cycle Closure: Finalize reports and document lessons.
+3. Static Testing (Non-Execution Based)
+Static testing finds the causes of failures (defects) rather than the failures themselves by examining artifacts without running code.
+•	Manual Reviews:
+o	Informal Review: Quick check without a formal process.
+o	Walkthrough: The author leads the team through a document to find errors.
+o	Technical Review: Peer group focus on technical integrity.
+o	Inspection: The most formal review with defined roles (Moderator, Author, Scribe, Reviewer).
+•	Automated Static Analysis: Tools check against Coding Standards, Code Metrics, and Code Structure.
+4. Black Box (Specification-Based) Testing
+Tests functionality against requirements without knowledge of internal code.
+•	Equivalence Partitioning (EP): Grouping inputs into valid/invalid partitions that should be processed identically.
+•	Boundary Value Analysis (BVA): Testing values at the edges of partitions, where errors are most likely.
+•	Decision Tables: Used for complex logic where different input combinations yield different actions.
+•	Integration Testing: Testing interfaces between modules.
+o	Big-Bang: Testing all modules together at once.
+o	Top-Down: Uses Stubs to simulate lower-level modules.
+o	Bottom-Up: Uses Drivers to simulate higher-level modules.
+5. Structural (White Box) Testing
+Focuses on the internal logic and implementation of the program.
+•	Control Flow Graph (CFG): A visual representation of all paths through the code—essential for your case study analysis.
+•	Cyclomatic Complexity $V(G)$: A metric to determine the number of independent paths.
+o	$V(G) = Edges - Nodes + 2$.
+o	$V(G) = Predicate Nodes + 1$.
+•	Basis Path Testing: Designing test cases to execute every independent path identified in the CFG.
+6. Unit Testing, JUnit 5, and TDD
+Testing individual software units (usually classes) in isolation.
+•	JUnit 5 Annotations:
+o	@Test: Marks a method as a test.
+o	@BeforeEach/@AfterEach: Setup and cleanup for every test.
+o	@BeforeAll/@AfterAll: One-time setup/cleanup (e.g., DB connections).
+•	Assertions: Methods like assertEquals() and assertTrue() to verify results.
+•	Test-Driven Development (TDD): A process where tests are written before code.
+o	Red: Write a failing test.
+o	Green: Write minimum code to pass.
+o	Refactor: Clean the code while maintaining functionality.
+7. System, Non-Functional, and Automation
+•	System Testing: Validating the fully integrated system against requirements.
+•	Non-Functional Testing: Focuses on performance (speed/stability), usability, and accessibility.
+•	Acceptance Testing: Validates if the system is ready for delivery.
+o	Alpha Test: Conducted at the developer's site.
+o	Beta Test: Conducted at the client's site in a target environment.
+•	Automation: Using software to control test execution, which significantly reduces the cost of Regression Testing (re-running tests after changes to ensure no new defects were introduced).
+8. Assessment Focus (WRIT1 Requirements)
+Your report must include:
+1.	Case Study Analysis: Detailed description of the chosen system.
+2.	Test Plan & Design: Development of plans and specific test cases (BVA, EP, etc.).
+3.	Test Execution: Recording actual results against expected results.
+4.	Code Coverage Analysis: Using structural testing metrics (Cyclomatic Complexity) to report on how much code was tested.
+5.	Error Reporting: A structured analysis of defects found.
+
