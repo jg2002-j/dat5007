@@ -199,7 +199,7 @@ public class PlannerServiceTest {
         assertEquals(2, result.getMeals().get(MealSlot.LUNCH).size());
 
         verify(recipeService, times(3)).getRecipeById(anyString());
-        verify(plannerRepo, times(3)).saveSlotMealUuid(eq(date), any(), anyString());
+        verify(plannerRepo, times(1)).saveDayPlanBatch(eq(date), anyMap());
     }
 
     // =========================================================================

@@ -1,56 +1,85 @@
-describe("Planner API E2E", () => {
-  before(() => {
-    cy.waitForPlannerApi().then((response) => {
-      expect([200, 400]).to.include(response.status);
-    });
-  });
+describe("Planner API E2E - System Testing Suite", () => {
+    const VALID_UUID = "550e8400-e29b-41d4-a716-446655440001";
+    const TEST_DATE = "2026-05-25";
 
-  it("saves a day plan with empty meals", () => {
-    cy.fixture("day-plan-empty.json").then((payload) => {
-      cy.apiPost("/planner/save/day", payload).then((response) => {
-        expect(response.status).to.eq(200);
-        expect(response.body.date).to.eq(payload.date);
-        expect(response.body.meals).to.deep.eq({});
-      });
+    before(() => {
+        // Phase: Test Environment Setup (STLC Phase 4)
+        cy.waitForPlannerApi();
     });
-  });
 
-  it("saves and then retrieves a day plan", () => {
-    cy.fixture("day-plan-empty-slot.json").then((payload) => {
-      cy.apiPost("/planner/save/day", payload).then((saveResponse) => {
-        expect(saveResponse.status).to.eq(200);
-        expect(saveResponse.body.date).to.eq(payload.date);
-      });
+    // =========================================================================
+    // TECHNIQUE: POSITIVE EQUIVALENCE PARTITIONING (Happy Path)
+    // =========================================================================
+    it("should successfully save and then retrieve a full day plan", () => {
+        const payload = {
+            date: TEST_DATE,
+            mealUuids: {
+                BREAKFAST: [VALID_UUID],
+                LUNCH: [VALID_UUID]
+            }
+        };
 
-      cy.apiGet(`/planner/view/day/${payload.date}`).then((viewResponse) => {
-        expect(viewResponse.status).to.eq(200);
-        expect(viewResponse.body.date).to.eq(payload.date);
-        expect(viewResponse.body.meals).to.have.property("BREAKFAST");
-        expect(viewResponse.body.meals.BREAKFAST).to.be.an("array");
-      });
+        // Action: Save Plan
+        cy.apiPost("/planner/save/day", payload).then((res) => {
+            expect(res.status).to.eq(200);
+        });
+
+        // Action: Retrieve and Verify State (Persistence Check)
+        cy.apiGet(`/planner/view/day/${TEST_DATE}`).then((res) => {
+            expect(res.status).to.eq(200);
+            expect(res.body.date).to.eq(TEST_DATE);
+            expect(res.body.meals.BREAKFAST[0].name).to.eq("E2E Pasta");
+        });
     });
-  });
 
-  it("returns 500 when saving with null date", () => {
-    cy.fixture("day-plan-null-date.json").then((payload) => {
-      cy.apiPost("/planner/save/day", payload).then((response) => {
-        expect(response.status).to.eq(500);
-      });
+    // =========================================================================
+    // TECHNIQUE: NEGATIVE EQUIVALENCE PARTITIONING (Invalid Inputs)
+    // =========================================================================
+    it("should return 400 for invalid date format (yyyy-dd-mm)", () => {
+        cy.apiGet("/planner/view/day/2026-25-05").then((res) => {
+            expect(res.status).to.eq(400);
+        });
     });
-  });
 
-  it("returns 400 for invalid date format in view endpoint", () => {
-    cy.apiGet("/planner/view/day/27-04-2026").then((response) => {
-      expect(response.status).to.eq(400);
-      expect(response.body).to.have.property("message");
+    it("should return 400 when a recipe UUID does not exist", () => {
+        const payload = {
+            date: "2026-01-01",
+            mealUuids: {OTHER: ["non-existent-uuid"]}
+        };
+        cy.apiPost("/planner/save/day", payload).then((res) => {
+            // After the service fix, this should be 400, not 500
+            expect(res.status).to.eq(400);
+        });
     });
-  });
 
-  it("returns 400 for partial date in view endpoint", () => {
-    cy.apiGet("/planner/view/day/2026-04").then((response) => {
-      expect(response.status).to.eq(400);
-      expect(response.body).to.have.property("message");
+    // =========================================================================
+    // TECHNIQUE: BOUNDARY VALUE ANALYSIS (BVA)
+    // =========================================================================
+    it("should handle a plan with zero meals (Empty Boundary)", () => {
+        const payload = {date: "2026-12-31", mealUuids: {}};
+        cy.apiPost("/planner/save/day", payload).then((res) => {
+            expect(res.status).to.eq(200);
+            expect(res.body.meals).to.be.empty;
+        });
     });
-  });
+
+    // =========================================================================
+    // TECHNIQUE: STATE TRANSITION (Idempotency)
+    // =========================================================================
+    it("should overwrite an existing plan for the same date", () => {
+        const date = "2026-06-01";
+        const firstPlan = {date: date, mealUuids: {BREAKFAST: [VALID_UUID]}};
+        const secondPlan = {date: date, mealUuids: {DINNER: [VALID_UUID]}};
+
+        cy.apiPost("/planner/save/day", firstPlan);
+        cy.apiPost("/planner/save/day", secondPlan).then((res) => {
+            expect(res.status).to.eq(200);
+        });
+
+        cy.apiGet(`/planner/view/day/${date}`).then((res) => {
+            // State check: Should have DINNER, but BREAKFAST should be gone
+            expect(res.body.meals).to.have.property("DINNER");
+            expect(res.body.meals).to.not.have.property("BREAKFAST");
+        });
+    });
 });
-

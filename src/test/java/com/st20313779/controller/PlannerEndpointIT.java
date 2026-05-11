@@ -137,7 +137,7 @@ public class PlannerEndpointIT {
         .when()
             .post("/planner/save/day")
         .then()
-            .statusCode(200); // Currently accepts any date format in JSON
+            .statusCode(400);
     }
 
     // =========================================================================
@@ -183,7 +183,7 @@ public class PlannerEndpointIT {
         .when()
             .post("/planner/save/day")
         .then()
-            .statusCode(500); // IllegalArgumentException → 500
+            .statusCode(400);
     }
 
     // =========================================================================
@@ -412,5 +412,28 @@ public class PlannerEndpointIT {
         .then()
             .statusCode(200); // Currently no 401 response
     }
+
+    // =========================================================================
+    // FAILURE TEST
+    // =========================================================================
+    @Test
+    @DisplayName("Negative Test: Save Day Plan with Null Date (Defect Discovery)")
+    void testSaveDayPlanWithNullDate_ShouldFail() {
+        // Input: A DTO with a null date
+        DayMealsDto dto = new DayMealsDto()
+                .setDate(null) // This will cause a NullPointerException in the Service
+                .setMealUuids(new HashMap<>());
+
+        given()
+                .contentType(ContentType.JSON)
+                .body(dto)
+                .when()
+                .post("/planner/save/day")
+                .then()
+                // EXPECTED: 400 Bad Request
+                // ACTUAL (Current): 500 Internal Server Error
+                .statusCode(400);
+    }
+
 }
 

@@ -1,6 +1,7 @@
 package com.st20313779.repository;
 
 import com.st20313779.model.MealSlot;
+import com.st20313779.model.recipe.Recipe;
 import com.st20313779.repository.dto.DayMealsDto;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
@@ -12,6 +13,7 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Slf4j
 @ApplicationScoped
@@ -19,6 +21,32 @@ public class PlannerRepo {
 
     @Inject
     DataSource ds;
+
+    @Transactional
+    public void saveDayPlanBatch(final Date date, final Map<MealSlot, List<Recipe>> meals) {
+        try (final Connection conn = ds.getConnection()) {
+            // 1. Delete existing entries for this date to allow overrides
+            try (PreparedStatement deletePs = conn.prepareStatement("DELETE FROM public.meals WHERE tdate = ?")) {
+                deletePs.setDate(1, date);
+                deletePs.executeUpdate();
+            }
+
+            // 2. Batch Insert
+            try (PreparedStatement ps = conn.prepareStatement("INSERT INTO public.meals (tdate, slot, recipe_uuid) VALUES (?, ?, ?)")) {
+                for (Map.Entry<MealSlot, List<Recipe>> entry : meals.entrySet()) {
+                    for (Recipe recipe : entry.getValue()) {
+                        ps.setDate(1, date);
+                        ps.setString(2, entry.getKey().name());
+                        ps.setString(3, recipe.getId());
+                        ps.addBatch();
+                    }
+                }
+                ps.executeBatch();
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException("Database error during batch save", e);
+        }
+    }
 
     @Transactional
     public void saveSlotMealUuid(final Date date, final MealSlot slot, final String uuid) {

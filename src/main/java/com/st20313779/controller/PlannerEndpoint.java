@@ -76,7 +76,10 @@ public class PlannerEndpoint {
     }
 
     private RuntimeException mapServiceFailure(final RuntimeException ex) {
-        if (ex instanceof IllegalArgumentException || ex instanceof WebApplicationException || ex instanceof ServiceLayerException) {
+        if (ex instanceof IllegalArgumentException) {
+            return new BadRequestException(ex.getMessage());
+        }
+        if (ex instanceof WebApplicationException || ex instanceof ServiceLayerException) {
             return ex;
         }
         return new ServiceLayerException("Service layer failure", ex);

@@ -71,13 +71,18 @@ public class PlannerService {
 
     private void writeDayPlanToDb(final DayPlan dayPlan) {
         final Date date = Date.valueOf(dayPlan.getDate());
-        dayPlan.getMeals().forEach((slot, recipes) -> {
-            for (final Recipe recipe : recipes) {
-                recipeRepo.saveRecipe(recipe);
-                plannerRepo.saveSlotMealUuid(date, slot, recipe.getId());
-            }
-        });
+        plannerRepo.saveDayPlanBatch(date, dayPlan.getMeals());
     }
+
+//    private void writeDayPlanToDb(final DayPlan dayPlan) {
+//        final Date date = Date.valueOf(dayPlan.getDate());
+//        dayPlan.getMeals().forEach((slot, recipes) -> {
+//            for (final Recipe recipe : recipes) {
+//                recipeRepo.saveRecipe(recipe);
+//                plannerRepo.saveSlotMealUuid(date, slot, recipe.getId());
+//            }
+//        });
+//    }
 
     public DayPlan getDayPlan(final LocalDate date) {
         final DayMealsDto meals = plannerRepo.getDayPlan(Date.valueOf(date));
